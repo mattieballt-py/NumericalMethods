@@ -7,7 +7,7 @@ Golden Search Method to find max/min of a function
 # want to find maximum of a function using only one func eval per iteration
 
 # the function we want to search for a max in
-def df(x): # will find where df/dx = 0
+def df(x): # will find min/max of df/dx which corresponds to where f''x = 0 => inflection point
     return -2*x*np.exp((-x**2))
 
 #not recursively
