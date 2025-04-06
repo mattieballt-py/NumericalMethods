@@ -96,6 +96,8 @@ Newton Raphson Method (1 of 2 open methods)
 def g(x):
     return x**2 + 5
 
+# if linear system of eqns, could solve with x = A-1 linalgsolve with b
+# for non linear syst eqns like x^2 + y^2 = 2 etc, use:
 def NewtonRaph(x0,tol):
 
     return
