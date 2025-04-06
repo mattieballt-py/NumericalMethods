@@ -81,5 +81,9 @@ def goldsearch(xl,xu,i):
 #print(goldsrch(0,1,0.01))
 
 """
+Newton Raphson Method (same as for RootFinding but f'=0 not f=0)
+"""
+
+"""
 Steepest Ascent Method
 """

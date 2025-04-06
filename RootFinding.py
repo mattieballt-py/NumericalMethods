@@ -96,11 +96,20 @@ Newton Raphson Method (1 of 2 open methods)
 def g(x):
     return x**2 + 5
 
+# could numerically find g' or:
+def gder(x):
+    return 2*x
+
 # if linear system of eqns, could solve with x = A-1 linalgsolve with b
 # for non linear syst eqns like x^2 + y^2 = 2 etc, use:
 def NewtonRaph(x0,tol):
-
-    return
+    xn = x0
+    err = 10 # init error
+    while err > tol:
+        xn_1 = xn - g(xn)/gder(xn)
+        err = abs((xn_1 - xn)/xn_1)
+        xn = xn_1
+    return xn
 
 """
 Secant Method (2 of 2 open methods)
