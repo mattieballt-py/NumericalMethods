@@ -47,10 +47,10 @@ Integration of f(x) for a spacing of h between A and B with known points
 """
 A = 0
 B = 1
-N = 10 # total number of known points
+N = 10000 # total number of known points
 h = (B-A)/N
 
-x_known = np.linspace(A,B,N)
+x_known = np.linspace(A,B+h,N)
 
 def f(x_known):
     return x_known * np.exp(x_known**2)
@@ -93,7 +93,7 @@ def Simp13adaptive(y_known, N, h,tol):
     I = h/3 * (I + 4*I_odd + 2*I_even)
 
     act = GuassQuad(g,7) # as its the same function
-    err = (act - I)/act
+    err = (act - I)
     print("err",err)
     if abs(err) > tol:
         N += 100 # increase number of points
@@ -105,3 +105,17 @@ def Simp13adaptive(y_known, N, h,tol):
     return I
 
 print("simpadapt", Simp13adaptive(y_known,N,h,0.00005), "vs guass quad: ", GuassQuad(g,7))
+
+
+"""
+Trapezium Rule
+"""
+
+def TrapInt(A,B,h,N,y_known):
+    I = 0 # init
+    for n in range(1,N):
+        I += y_known[n] 
+    I = h*(I + f(A)/2 + f(B)/2)
+    return I
+
+print("Trap result: ",TrapInt(A,B,h,N,y_known))
