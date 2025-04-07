@@ -1,6 +1,5 @@
 # basically algorithms to find where f(x) = 0
 
-
 """
 Bisection Method (1 of 2 Bracketing Methods)
 """
