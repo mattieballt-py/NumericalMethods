@@ -1,6 +1,8 @@
 # using algorithms from the other py files in this folder
 # putting them here as I often mess them up with different parameters and alterations
 
+import numpy as np
+import matplotlib.pyplot as plt 
 """
 Wave Eqn Explicit Non-Dimensionalised, Newman LHS and RHS BC
 """
