@@ -84,8 +84,3 @@ y_known = [0, 1, 4]  # f(x) = x^2, so f'(x) = 2x, f''(x) = 2
 print("Central 1st derivative at x=1:", central_diff_derivative(x_known, y_known, 1, 1))  # Should be close to 2
 print("Forward 1st derivative at x=0:", forward_diff_derivative(x_known, y_known, 1, 0))  # Should be close to 1
 
-
-
-"""
-
-"""

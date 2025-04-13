@@ -51,3 +51,9 @@ plt.title('Wave Equation Solution - Explicit Method')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+
+from vidstab import VidStab
+
+stabilizer = VidStab()
+stabilizer.stabilize(input_path='/Users/hedgehog/Desktop/MechEng_Degree/ME2_All/Computing_ME2/Python_ME2/NumericalMethods/NumericalMethods/VID00016.AVI', output_path='stabilized_video.mp4')
