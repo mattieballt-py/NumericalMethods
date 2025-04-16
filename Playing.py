@@ -41,7 +41,7 @@ def explicitWave(x,t,U,r): # with BC's set up as tutorial question
     return U
 
 diff = explicitWave(x,t,U,r)
-print(diff)
+#print(diff)
 
 # Plot results
 plt.figure(figsize=(10, 6))
@@ -52,7 +52,7 @@ plt.ylabel('wave position')
 plt.title('Wave Equation Solution - Explicit Method')
 plt.legend()
 plt.grid(True)
-plt.show()
+#plt.show()
 
 
 """
@@ -73,10 +73,11 @@ M = np.ndarray((10,10 )) # empty 10 by 10 matrix
 # Display the image
 plt.imshow(img_matrix)
 plt.axis('off')  # Hide axes
-plt.show()
+#plt.show()
 
 # img_matrix is now a NumPy array representing the image
-print("Image shape:", img_matrix.shape)
+#print("Image shape:", img_matrix.shape)
+
 
 """
 3D Lagrangian
@@ -115,3 +116,58 @@ def trilinear_interp(x, y, z, x_vals, y_vals, z_vals, f_vals):
     c = c0 * (1 - zd) + c1 * zd
 
     return c
+
+"""
+Barycentric Interpolation of a triangulated mesh hob and teapot
+"""
+#
+# Define the actual function
+def f_actual(pt):
+    x,y = pt
+    return np.exp(x * np.cos(y))  # Example function
+
+def Barycentric(r,func,p):
+    lam = np.zeros(3, dtype=float) # lambda 1  = area U/(U+V+W) # find areas with cross product of vectors between corners/2
+    lam[0] = ((r[1][1] - r[2][1])*(p[0] - r[2][0]) + (r[2][0] - r[1][0])*(p[1] - r[2][1]))/((r[1][1] - r[2][1])*(r[0][0] - r[2][0]) + (r[2][0] - r[1][0])*(r[0][1] - r[2][1]))
+    lam[1] = ((r[2][1] - r[0][1])*(p[0] - r[2][0]) + (r[0][0] - r[2][0])*(p[1] - r[2][1]))/((r[1][1] - r[2][1])*(r[0][0] - r[2][0]) + (r[2][0] - r[1][0])*(r[0][1] - r[2][1]))
+    lam[2] = 1 - lam[0] - lam[1]
+    for i in range(0,2):
+        if lam[i] < 0:
+            return print("p is not inside the three points in r")
+    return lam[0]*func(r[0]) + lam[1]*func(r[1]) + lam[2]*func(r[2])
+
+r = np.array([[1, 0], [0, 0], [0.5, 1]])
+p = np.array([0.45, 0.42])
+
+# Just calculate interpolated value at p
+Bary = Barycentric(r, f_actual, p)
+print(f"Barycentric interpolation at {p}: {Bary:.4f}")
+
+# Grid for plotting
+x_vals = np.linspace(0, 1, 300)
+y_vals = np.linspace(0, 1.1, 300)
+
+xs, ys, zs = [], [], []
+
+for x in x_vals:
+    for y in y_vals:
+        pt = np.array([x, y])
+        z = Barycentric(r, f_actual, pt)
+        if z is not None:
+            xs.append(x)
+            ys.append(y)
+            zs.append(z)
+
+# Scatter plot the interpolated surface
+plt.figure(figsize=(6, 6))
+sc = plt.scatter(xs, ys, c=zs, cmap='coolwarm', s=2)
+plt.plot(*r[[0, 1, 2, 0]].T, c='k', linewidth=2)  # triangle outline
+plt.scatter(*p, color='black', label='Interpolated point')
+plt.colorbar(sc, label='Interpolated Value')
+plt.title('Barycentric Interpolation (Simple Visual Test)')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.axis('equal')
+plt.legend()
+plt.grid(True)
+#plt.show()
