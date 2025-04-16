@@ -214,3 +214,84 @@ r = np.array([[1, 0], [0, 0], [0.5, 1]])
 p = np.array([0.45, 0.42])
 
 
+"""
+Root Finding to find Water Tank min Volume
+"""
+# given volume equation in regards to parameters
+# using 2 of 2 bracketing methods: False Position Method
+
+R = 2 # radius of water tank
+def f(x):
+    return (3.14 * R * x **2) - ((3.14/3)*x**3) - 25
+
+
+# false position method recursively
+def falseposition(a,b,tol,i):
+    if f(a)*f(b)>0: # check valid interval
+        print("choose new interval")
+        return None
+
+    n = b - (f(b)*(a-b))/(f(a) - f(b)) #new x point, at intersection with 0 instead of bang in middle like bisection method
+    print('new n', n)
+
+    if f(a)*f(n)<0: # function changes sign between a and n
+        # best guess before was n, now n + 1 = (a + n)/2
+        # err = (new - old) /new
+        n_plus1 = n - (f(n)*(a-n))/(f(a) - f(n)) #new x point, at intersection with 0 instead of bang in middle like bisection method
+        errnew = ((n_plus1 - n)/n_plus1)
+        print("ner error: ",errnew)
+        if abs(errnew) < tol:
+            return ((a + n)/2) # if interval less than min, the root is at centre of it ish
+        else: # replace b with n
+            i += 1
+            print(i)
+        return falseposition(a,n,tol,i)
+  
+    else:  # function changes sign between n and b
+        n_plus1 = b - (f(b)*(n-b))/(f(n) - f(b)) #new x point, at intersection with 0 instead of bang in middle like bisection method
+        errnew = ((n_plus1 - n)/n_plus1)
+        print("ner error: ",errnew)
+        if abs(errnew) < tol:
+            return ((n + b)/2) # if interval less than min, the root is at centre of it ish
+        i += 1
+        print(i)
+        return falseposition(n,b,tol,i)
+
+
+#print(falseposition(0,2*R,0.001,1))
+# a, b is the interval to evaluate inside
+
+### with Newton Raphson:
+
+# need to differentiate f(x) aka V(h) (central as more accurate)
+# Numerical derivative using central difference
+def numerical_derivative(h, delta):
+    return (f(h + delta) - f(h - delta)) / (2 * delta)
+
+# if linear system of eqns, could solve with x = A-1 linalgsolve with b
+# for non linear syst eqns like x^2 + y^2 = 2 etc, use:
+def NewtonRaph(x0,tol):
+    xn = x0 # guess
+    err = 10 # init error
+    while err > tol:
+        delta=1e-5
+        xn_1 = xn - f(xn)/numerical_derivative(xn,delta)
+        err = abs((xn_1 - xn)/xn_1)
+        xn = xn_1
+        print("tryin again")
+    return xn
+
+print(NewtonRaph(1.99*R,0.01))
+
+
+# plotting the water tank function
+x = np.arange(-2,5,0.01)
+y = f(x)
+# Scatter plot the interpolated surface
+plt.figure(figsize=(6, 6))
+sc = plt.scatter(x, y)
+plt.title('Barycentric Interpolation (Simple Visual Test)')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.grid(True)
+plt.show()

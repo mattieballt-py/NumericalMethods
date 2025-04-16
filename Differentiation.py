@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt  
 
+
 def choose(a, b):
     """
     Computes the binomial coefficient "a choose b" = a! / (b! * (a - b)!)
@@ -25,37 +26,41 @@ K-th Order Derivative
 # numerical result of d/dx eg
 # function that returns central diff kth derivative
 
-def central_diff_derivative(x_known, y_known, k, n):
+
+def central_diff_derivative_general(x_known, y_known, k, n, step_multiple=1):
+    """
+    Compute the k-th derivative at point index n using central difference with
+    spacing of h * step_multiple (e.g., 2h for step_multiple=2)
+    """
+    h = x_known[1] - x_known[0]
+    h_step = h * step_multiple
+
+    # Number of stencil points needed (minimum: k+1, better: odd number around center)
+    stencil_size = k + 1 if k % 2 == 0 else k + 2
+    if stencil_size % 2 == 0:
+        stencil_size += 1  # Make it odd for central symmetry
+
+    half = stencil_size // 2
+
+    # Create stencil offsets (e.g., [-2, -1, 0, 1, 2] for step=1, or [-4, -2, 0, 2, 4] for step=2)
+    offsets = [i * step_multiple for i in range(-half, half + 1)]
     
-    h = x_known[1] - x_known[0]  # Uniform step size
-    D = 0  # Final result
+    # Check bounds
+    idxs = [n + i for i in range(-half, half + 1)]
+    if min(idxs) < 0 or max(idxs) >= len(y_known):
+        raise IndexError("Not enough points for this stencil.")
 
-    # For odd k, use spacing of 2h
-    if k % 2 != 0:
-        # Central difference over 2h spacing
-        half_stencil = (k + 1) // 2  # How far out to go
-        if n - half_stencil < 0 or n + half_stencil >= len(y_known):
-            raise IndexError("Not enough points for central difference at this index.")
+    # Build Vandermonde system to solve for coefficients
+    A = np.array([[offset**i for offset in offsets] for i in range(stencil_size)])
+    b = np.zeros(stencil_size)
+    b[k] = np.math.factorial(k)
 
-        for i in range(-half_stencil, half_stencil + 1):
-            coeff = central_diff_coeff(k, i * 2)  # Spacing = 2h
-            D += coeff * y_known[n + i]
+    coeffs = np.linalg.solve(A, b)
 
-        D /= (2 * h)**k
+    # Apply to data
+    D = sum(c * y_known[n + i] for c, i in zip(coeffs, range(-half, half + 1)))
+    return D / (h_step**k)
 
-    else:
-        # Even-order derivative with 1h spacing
-        half_stencil = k // 2
-        if n - half_stencil < 0 or n + half_stencil >= len(y_known):
-            raise IndexError("Not enough points for central difference at this index.")
-
-        for i in range(-half_stencil, half_stencil + 1):
-            coeff = central_diff_coeff(k, i)
-            D += coeff * y_known[n + i]
-
-        D /= h**k
-
-    return D
 
 
 

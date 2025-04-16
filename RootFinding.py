@@ -44,7 +44,7 @@ print(bisecrecurs(0,2*R,0.001,1))
 """
 False Position Method (2 of 2 Bracketing Methods)
 """
-
+# also diff recursive in playing 
 def g(x):
     return x**2 + (x-2)**3 - 4
 
@@ -91,7 +91,7 @@ def falsepos(a,b,tol,i):
 """
 Newton Raphson Method (1 of 2 open methods)
 """
-
+# useful for finding e.g a/b efficiently
 def g(x):
     return x**2 + 5
 
