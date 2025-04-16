@@ -10,7 +10,7 @@ import csv # for writing
 Dealing with csv's
 """
 
-with open('Rocket.txt', 'r') as d:
+with open('txt_Data/Hob.Elements.txt', 'r') as d:
     Rckt = d.readlines()
 
 # Initialize lists to store cleaned float values
@@ -34,7 +34,7 @@ array = np.array([[1.2, 2.5, 3.8],
                   [7.7, 8.8, 9.9]])
 
 # Save to CSV
-with open('output.csv', mode='w', newline='') as file:
+with open('txt_data/output.csv', mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerows(array)
 
@@ -156,6 +156,7 @@ Teapot Barycentric Interpolation of a triangulated mesh hob and teapot
 """
 # have two meshes, want to find if function values overlap
 # if  they do, interpolate the teapot temps from the hob temps
+data = {}
 
 def read_lines(filename):
     with open(filename, 'r') as f:
@@ -165,11 +166,17 @@ def read_lines(filename):
 def clean_floats(lines):
     cleaned = []
     for line in lines:
-        try:
-            cleaned.append(round(float(line.strip())))
-        except ValueError:
-            continue
+        parts = line.strip().replace(',', ' ').split()  # convert commas to spaces first
+        row = []
+        for part in parts:
+            try:
+                row.append(round(float(part)))
+            except ValueError:
+                continue
+        if row:
+            cleaned.append(row)
     return cleaned
+
 
 # File mapping: variable name -> path
 file_map = {
@@ -180,11 +187,17 @@ file_map = {
     'Tp_Nodes': 'txt_Data/TeaPot.Nodes.txt'
 }
 
+
 # Load and clean files into variables
 for var, path in file_map.items():
     raw_lines = read_lines(path)
+    #print(f"{var} raw:", raw_lines[:3])  # Preview first 3 lines
+
     cleaned_vals = clean_floats(raw_lines)
-    globals()[var] = cleaned_vals  # Can now use Hb_Elements, Tp_Nodes, etc.
+    print(f"{var} cleaned:", cleaned_vals[:3])  # Preview cleaned data
+
+    data[var] = cleaned_vals
+
 
 
 def Barycentric(r,func,p):
@@ -200,35 +213,4 @@ def Barycentric(r,func,p):
 r = np.array([[1, 0], [0, 0], [0.5, 1]])
 p = np.array([0.45, 0.42])
 
-# Just calculate interpolated value at p
-Bary = Barycentric(r, f_actual, p)
-print(f"Barycentric interpolation at {p}: {Bary:.4f}")
 
-# Grid for plotting
-x_vals = np.linspace(0, 1, 300)
-y_vals = np.linspace(0, 1.1, 300)
-
-xs, ys, zs = [], [], []
-
-for x in x_vals:
-    for y in y_vals:
-        pt = np.array([x, y])
-        z = Barycentric(r, f_actual, pt)
-        if z is not None:
-            xs.append(x)
-            ys.append(y)
-            zs.append(z)
-
-# Scatter plot the interpolated surface
-plt.figure(figsize=(6, 6))
-sc = plt.scatter(xs, ys, c=zs, cmap='coolwarm', s=2)
-plt.plot(*r[[0, 1, 2, 0]].T, c='k', linewidth=2)  # triangle outline
-plt.scatter(*p, color='black', label='Interpolated point')
-plt.colorbar(sc, label='Interpolated Value')
-plt.title('Barycentric Interpolation (Simple Visual Test)')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.axis('equal')
-plt.legend()
-plt.grid(True)
-#plt.show()
