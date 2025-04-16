@@ -77,3 +77,41 @@ plt.show()
 
 # img_matrix is now a NumPy array representing the image
 print("Image shape:", img_matrix.shape)
+
+"""
+3D Lagrangian
+"""
+
+def trilinear_interp(x, y, z, x_vals, y_vals, z_vals, f_vals):
+    """
+    Perform trilinear interpolation at point (x, y, z).
+
+    Args:
+        x, y, z: Coordinates where the function is interpolated
+        x_vals: [x0, x1] - known x coordinates (must be sorted)
+        y_vals: [y0, y1] - known y coordinates (must be sorted)
+        z_vals: [z0, z1] - known z coordinates (must be sorted)
+        f_vals: 2x2x2 numpy array containing function values at corners
+
+    Returns:
+        Interpolated scalar value at (x, y, z)
+    """
+    # Normalize x, y, z into [0, 1] local coordinates within the cube
+    xd = (x - x_vals[0]) / (x_vals[1] - x_vals[0])
+    yd = (y - y_vals[0]) / (y_vals[1] - y_vals[0])
+    zd = (z - z_vals[0]) / (z_vals[1] - z_vals[0])
+
+    # Interpolate along x
+    c00 = f_vals[0, 0, 0] * (1 - xd) + f_vals[1, 0, 0] * xd
+    c01 = f_vals[0, 0, 1] * (1 - xd) + f_vals[1, 0, 1] * xd
+    c10 = f_vals[0, 1, 0] * (1 - xd) + f_vals[1, 1, 0] * xd
+    c11 = f_vals[0, 1, 1] * (1 - xd) + f_vals[1, 1, 1] * xd
+
+    # Interpolate along y
+    c0 = c00 * (1 - yd) + c10 * yd
+    c1 = c01 * (1 - yd) + c11 * yd
+
+    # Interpolate along z
+    c = c0 * (1 - zd) + c1 * zd
+
+    return c
