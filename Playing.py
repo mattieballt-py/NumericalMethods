@@ -4,6 +4,40 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 import matplotlib.image as mpimg
+import csv # for writing
+
+"""
+Dealing with csv's
+"""
+
+with open('Rocket.txt', 'r') as d:
+    Rckt = d.readlines()
+
+# Initialize lists to store cleaned float values
+RHeights = []
+
+# Process each line in the Rocket file
+for item in Rckt:
+    # Strip leading/trailing whitespace
+    term = item.strip()
+    # Try to convert the term to a float
+    try:
+        clean_term = float(term)
+        RHeights.append(round(clean_term)) # Round to the nearest integer if needed
+    except ValueError:
+        # If conversion fails, skip this item
+        continue
+
+# Example 2D array
+array = np.array([[1.2, 2.5, 3.8],
+                  [4.0, 5.1, 6.3],
+                  [7.7, 8.8, 9.9]])
+
+# Save to CSV
+with open('output.csv', mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerows(array)
+
 
 """
 Wave Eqn Explicit Non-Dimensionalised, Newman LHS and RHS BC
@@ -118,13 +152,40 @@ def trilinear_interp(x, y, z, x_vals, y_vals, z_vals, f_vals):
     return c
 
 """
-Barycentric Interpolation of a triangulated mesh hob and teapot
+Teapot Barycentric Interpolation of a triangulated mesh hob and teapot
 """
-#
-# Define the actual function
-def f_actual(pt):
-    x,y = pt
-    return np.exp(x * np.cos(y))  # Example function
+# have two meshes, want to find if function values overlap
+# if  they do, interpolate the teapot temps from the hob temps
+
+def read_lines(filename):
+    with open(filename, 'r') as f:
+        return f.readlines()
+
+# Helper: clean & convert strings to float (rounded), skip invalids
+def clean_floats(lines):
+    cleaned = []
+    for line in lines:
+        try:
+            cleaned.append(round(float(line.strip())))
+        except ValueError:
+            continue
+    return cleaned
+
+# File mapping: variable name -> path
+file_map = {
+    'Hb_Elements': 'txt_Data/Hob.Elements.txt',
+    'Hb_Nodes': 'txt_Data/Hob.Nodes.txt',
+    'Hb_Temps': 'txt_Data/Hob.Temperatures.txt',
+    'Tp_Elements': 'txt_Data/TeaPot.Elements.txt',
+    'Tp_Nodes': 'txt_Data/TeaPot.Nodes.txt'
+}
+
+# Load and clean files into variables
+for var, path in file_map.items():
+    raw_lines = read_lines(path)
+    cleaned_vals = clean_floats(raw_lines)
+    globals()[var] = cleaned_vals  # Can now use Hb_Elements, Tp_Nodes, etc.
+
 
 def Barycentric(r,func,p):
     lam = np.zeros(3, dtype=float) # lambda 1  = area U/(U+V+W) # find areas with cross product of vectors between corners/2
