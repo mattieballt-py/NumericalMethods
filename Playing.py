@@ -3,6 +3,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt 
+import matplotlib.image as mpimg
+
 """
 Wave Eqn Explicit Non-Dimensionalised, Newman LHS and RHS BC
 """
@@ -53,7 +55,25 @@ plt.grid(True)
 plt.show()
 
 
-from vidstab import VidStab
+"""
+2D Interpolation of Images
+"""
+# Provide the correct relative or absolute path to your image
+image_path = '/Users/hedgehog/Desktop/MechEng_Degree/ME2_All/Computing_ME2/Python_ME2/NumericalMethods/NumericalMethods/img_Data/Flower.jpg'
 
-stabilizer = VidStab()
-stabilizer.stabilize(input_path='/Users/hedgehog/Desktop/MechEng_Degree/ME2_All/Computing_ME2/Python_ME2/NumericalMethods/NumericalMethods/VID00016.AVI', output_path='stabilized_video.mp4')
+# Load the image as a NumPy array
+img_matrix = mpimg.imread(image_path)
+
+M = np.ndarray((10,10 )) # empty 10 by 10 matrix
+#Image_Matrix = plt.imread() # import an image into a matrix
+#Matrix_to_Image = plt.imshow() # convert a matrix to an image
+#Save_matrix2image = plt.imsave() # display matrix as an image? 
+#size_as_tuple = M.shape() # should give size of matrix M
+
+# Display the image
+plt.imshow(img_matrix)
+plt.axis('off')  # Hide axes
+plt.show()
+
+# img_matrix is now a NumPy array representing the image
+print("Image shape:", img_matrix.shape)

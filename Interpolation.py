@@ -64,3 +64,19 @@ plt.scatter(xp,yp_12, color="indigo", label = "n = 12")
 plt.legend()
 plt.grid(True)
 plt.show()
+
+
+"""
+Barycentric Interpolation
+"""
+
+
+
+
+
+
+"""
+2D Interpolation
+"""
+
+# this 2d Interpolation done on images in playing
