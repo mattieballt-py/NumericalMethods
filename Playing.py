@@ -77,6 +77,7 @@ def explicitWave(x,t,U,r): # with BC's set up as tutorial question
 diff = explicitWave(x,t,U,r)
 #print(diff)
 
+"""
 # Plot results
 plt.figure(figsize=(10, 6))
 for n in [0, int(len(t)/4), int(len(t)/2), len(t)-1]:
@@ -87,27 +88,78 @@ plt.title('Wave Equation Solution - Explicit Method')
 plt.legend()
 plt.grid(True)
 #plt.show()
-
+"""
 
 """
 2D Interpolation of Images
 """
 # Provide the correct relative or absolute path to your image
 image_path = '/Users/hedgehog/Desktop/MechEng_Degree/ME2_All/Computing_ME2/Python_ME2/NumericalMethods/NumericalMethods/img_Data/Flower.jpg'
+img_matrix = mpimg.imread(image_path) # Load the image as a NumPy array
 
-# Load the image as a NumPy array
-img_matrix = mpimg.imread(image_path)
+# shrink the flower image
+n = 1
+img_shrunk = img_matrix[::n, ::n] # skips every n as start,stop,step then , for next direction ::n
+img_sml = plt.imsave('shrunk_flower.jpg',img_shrunk)
+print(img_matrix)
 
-M = np.ndarray((10,10 )) # empty 10 by 10 matrix
-#Image_Matrix = plt.imread() # import an image into a matrix
-#Matrix_to_Image = plt.imshow() # convert a matrix to an image
-#Save_matrix2image = plt.imsave() # display matrix as an image? 
-#size_as_tuple = M.shape() # should give size of matrix M
+# Nearest Neighbour interpolation of image
+def Neighb2d_Interp(A,n):
+     # receive image matrix A, and scale to interpolate to, n
+    orig_height, orig_width, channels = A.shape
+    new_height, new_width = orig_height * n, orig_width * n
+    Larger_Img = np.zeros((new_height, new_width, channels), dtype=A.dtype)
+    Larger_Img[::n,::n,:] = A # fill in known values
+    for i in range(0,new_height):
+        for j in range(0,new_width):
+            if (i % n != 0) or (j % n != 0):  # Skip known pixels as % is remainder from dividing
+                nearest_i = round(i / n)
+                nearest_j = round(j / n)
 
+                # Clamp to image bounds to avoid overflow at the edges
+                nearest_i = min(nearest_i, orig_height - 1)
+                nearest_j = min(nearest_j, orig_width - 1)
+
+                # Copy the pixel value
+                Larger_Img[i, j] = A[nearest_i, nearest_j]
+    return Larger_Img
+
+# Bilinear Interpolation of image
+def Interp2d_Bilinear(A,n):
+    # receive image matrix A, and scale to interpolate to, n
+    orig_height, orig_width, channels = A.shape
+    new_height, new_width = orig_height * n, orig_width * n
+
+    Larger_Img = np.zeros((new_height, new_width, channels), dtype=A.dtype)
+    Larger_Img[::n,::n,:] = A # fill in known values
+    for i in range(new_height):
+        for j in range(new_width):
+            if (i % n != 0) or (j % n != 0):  # Skip known pixels   
+                i_l = (i//n)*n # top left hand corner (i,j)
+                j_t = (j//n)*n
+                i_r = min(i_l + n, new_height - 1) # min of +n or if at edge
+                j_b = min(j_t + n, new_width - 1)
+                # now we have the square points, (i_tlh,j_tlh) (i_tlh,j_brh) etc
+                dx = (i-i_l)/n
+                dy = (j-j_t)/n
+                for c in range(channels): # retrieve corner values
+                    f00 = Larger_Img[i_l, j_t, c]
+                    f10 = Larger_Img[i_r, j_t, c]
+                    f01 = Larger_Img[i_l, j_b, c]
+                    f11 = Larger_Img[i_r, j_b, c]
+
+                    p = ((1-dx)*(1-dy)*f00 + dx*(1-dy)*f10 + (1-dx)*dy*f01 + dx*dy*f11)
+
+                    Larger_Img[i,j,c] = p
+    return Larger_Img
+
+
+img_Interp= Interp2d_Bilinear(img_shrunk,19)
+img_nearestneigh = Neighb2d_Interp(img_shrunk,6)
 # Display the image
-plt.imshow(img_matrix)
+plt.imshow(img_Interp)
 plt.axis('off')  # Hide axes
-#plt.show()
+plt.show()
 
 # img_matrix is now a NumPy array representing the image
 #print("Image shape:", img_matrix.shape)
@@ -170,7 +222,7 @@ def clean_floats(lines):
         row = []
         for part in parts:
             try:
-                row.append(round(float(part)))
+                row.append((float(part)))
             except ValueError:
                 continue
         if row:
@@ -197,6 +249,12 @@ for var, path in file_map.items():
     print(f"{var} cleaned:", cleaned_vals[:3])  # Preview cleaned data
 
     data[var] = cleaned_vals
+
+Hb_Elements = data['Hb_Elements']
+Hb_Nodes = data['Hb_Nodes']
+Hb_Temps = data['Hb_Temps']
+Tp_Elements = data['Tp_Elements']
+Tp_Nodes = data['Tp_Nodes']
 
 
 
@@ -281,7 +339,7 @@ def NewtonRaph(x0,tol):
         print("tryin again")
     return xn
 
-print(NewtonRaph(1.99*R,0.01))
+#print(NewtonRaph(1.99*R,0.01))
 
 
 # plotting the water tank function
@@ -294,4 +352,97 @@ plt.title('Barycentric Interpolation (Simple Visual Test)')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.grid(True)
-plt.show()
+#plt.show()
+
+## with secant method:
+
+# 2 of 2 open method for when can't f'(x)
+def secant(x0,x1,tol): # two initial guesses
+    xn = x0 # init
+    xn_1 = x1
+    err = 100 # just to init
+    while err > tol:
+        xn_2 = xn_1 - (f(xn_1)*(xn - xn_1))/(f(xn)-f(xn_1))
+        err = abs((xn_2 - xn_1)/xn_2)
+        xn,xn_1= xn_1,xn_2
+        print("tried again secant")
+    return xn_2
+
+print(secant(R,1.99*R,0.01))
+
+
+"""
+Newton Raphson for Multiple Roots
+"""
+# Numerical derivative analytically
+def f(x):
+    return x**3 - 2*x**2 - 4*x + 8
+
+def df(x):
+    return 3*x**2 - 4*x - 4
+
+# if linear system of eqns, could solve with x = A-1 linalgsolve with b
+# for non linear syst eqns like x^2 + y^2 = 2 etc, use:
+def NewtonRaph(x0,tol):
+    xn = x0 # guess
+    err = 10 # init error
+    while err > tol:
+        delta=1e-5
+        xn_1 = xn - 2*f(xn)/df(xn)
+        err = abs((xn_1 - xn)/xn_1)
+        xn = xn_1
+        print("tryin again")
+    return xn
+
+print(NewtonRaph(1.2,0.01))
+
+
+"""
+2D Integration of Royal Albert Hall
+"""
+
+# Task E
+import numpy as np
+
+a = 67 # major axis
+b = 56 # minor axis
+h = 25 # minor axis
+
+# set the step intervals in x and y
+dx = 0.5
+dy = 0.5
+
+# set the x range, not including the boundaries
+x = np.arange(-a+dx,a,dx)
+N = len(x)
+# the y range depends of the various values of x, and cannot be fixed here
+
+# integrate in dy, for all the value of x, i.e. find G(x)
+
+G = np.zeros(N)
+# for every x
+for i in range(0,N):
+    # determine the boundaries m and p for this x
+    mx = np.sqrt(b**2*(1-x[i]**2/a**2))
+    px = mx
+    # set the y points for this x, not including the boundaries
+    y = np.arange(-mx+dy,px,dy)
+    z = np.zeros(len(y))
+    # determine the values of the function z(x,y)
+    for j in range(0,len(y)):
+        z[j] = np.sqrt(h**2*(1-x[i]**2/a**2-y[j]**2/b**2)) 
+    
+    # integrate in dy from cx to dx (for this specific x)
+    G[i] = trapz(y,z) # G(x)
+
+# integrate G(x) in dx
+I = trapz(x,G)
+
+print(I)
+
+# for an emisphere the volume is:
+print((4/3*np.pi*a*b*h)/2)
+
+"""
+
+"""

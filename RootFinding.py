@@ -103,7 +103,7 @@ def gder(x):
 # for non linear syst eqns like x^2 + y^2 = 2 etc, use:
 def NewtonRaph(x0,tol):
     xn = x0
-    err = 10 # init error
+    err = 100 # init error
     while err > tol:
         xn_1 = xn - g(xn)/gder(xn)
         err = abs((xn_1 - xn)/xn_1)
@@ -113,3 +113,15 @@ def NewtonRaph(x0,tol):
 """
 Secant Method (2 of 2 open methods)
 """
+
+# 2 of 2 open method for when can't f'(x)
+def secant(x0,x1,tol): # two initial guesses
+    xn = x0 # init
+    xn_1 = x1
+    err = 100 # just to init
+    while err > tol:
+        xn_2 = xn_1 - (f(xn_1)*(xn - xn_1))/(f(xn)-f(xn_1))
+        err = abs((xn_2 - xn_1)/xn_2)
+        xn,xn_1= xn_1,xn_2
+    return xn_2
+
