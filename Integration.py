@@ -118,4 +118,4 @@ def TrapInt(A,B,h,N,y_known):
     I = h*(I + f(A)/2 + f(B)/2)
     return I
 
-print("Trap result: ",TrapInt(A,B,h,N,y_known))
+print("Trap result: ",TrapInt(A,B,h,N,y_known)

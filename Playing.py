@@ -10,7 +10,7 @@ import csv # for writing
 Dealing with csv's
 """
 
-with open('txt_Data/Hob.Elements.txt', 'r') as d:
+with open('txt_Data/Rocket.txt', 'r') as d:
     Rckt = d.readlines()
 
 # Initialize lists to store cleaned float values
@@ -101,7 +101,7 @@ img_matrix = mpimg.imread(image_path) # Load the image as a NumPy array
 n = 1
 img_shrunk = img_matrix[::n, ::n] # skips every n as start,stop,step then , for next direction ::n
 img_sml = plt.imsave('shrunk_flower.jpg',img_shrunk)
-print(img_matrix)
+#print(img_matrix)
 
 # Nearest Neighbour interpolation of image
 def Neighb2d_Interp(A,n):
@@ -154,12 +154,12 @@ def Interp2d_Bilinear(A,n):
     return Larger_Img
 
 
-img_Interp= Interp2d_Bilinear(img_shrunk,19)
-img_nearestneigh = Neighb2d_Interp(img_shrunk,6)
+#img_Interp= Interp2d_Bilinear(img_shrunk,2)
+#img_nearestneigh = Neighb2d_Interp(img_shrunk,2)
 # Display the image
-plt.imshow(img_Interp)
-plt.axis('off')  # Hide axes
-plt.show()
+#plt.imshow(img_Interp)
+#plt.axis('off')  # Hide axes
+#plt.show()
 
 # img_matrix is now a NumPy array representing the image
 #print("Image shape:", img_matrix.shape)
@@ -246,7 +246,7 @@ for var, path in file_map.items():
     #print(f"{var} raw:", raw_lines[:3])  # Preview first 3 lines
 
     cleaned_vals = clean_floats(raw_lines)
-    print(f"{var} cleaned:", cleaned_vals[:3])  # Preview cleaned data
+    #print(f"{var} cleaned:", cleaned_vals[:3])  # Preview cleaned data
 
     data[var] = cleaned_vals
 
@@ -290,29 +290,29 @@ def falseposition(a,b,tol,i):
         return None
 
     n = b - (f(b)*(a-b))/(f(a) - f(b)) #new x point, at intersection with 0 instead of bang in middle like bisection method
-    print('new n', n)
+    #print('new n', n)
 
     if f(a)*f(n)<0: # function changes sign between a and n
         # best guess before was n, now n + 1 = (a + n)/2
         # err = (new - old) /new
         n_plus1 = n - (f(n)*(a-n))/(f(a) - f(n)) #new x point, at intersection with 0 instead of bang in middle like bisection method
         errnew = ((n_plus1 - n)/n_plus1)
-        print("ner error: ",errnew)
+        #print("ner error: ",errnew)
         if abs(errnew) < tol:
             return ((a + n)/2) # if interval less than min, the root is at centre of it ish
         else: # replace b with n
             i += 1
-            print(i)
+            #print(i)
         return falseposition(a,n,tol,i)
   
     else:  # function changes sign between n and b
         n_plus1 = b - (f(b)*(n-b))/(f(n) - f(b)) #new x point, at intersection with 0 instead of bang in middle like bisection method
         errnew = ((n_plus1 - n)/n_plus1)
-        print("ner error: ",errnew)
+        #print("ner error: ",errnew)
         if abs(errnew) < tol:
             return ((n + b)/2) # if interval less than min, the root is at centre of it ish
         i += 1
-        print(i)
+        #print(i)
         return falseposition(n,b,tol,i)
 
 
@@ -336,7 +336,7 @@ def NewtonRaph(x0,tol):
         xn_1 = xn - f(xn)/numerical_derivative(xn,delta)
         err = abs((xn_1 - xn)/xn_1)
         xn = xn_1
-        print("tryin again")
+        #print("tryin again")
     return xn
 
 #print(NewtonRaph(1.99*R,0.01))
@@ -365,10 +365,10 @@ def secant(x0,x1,tol): # two initial guesses
         xn_2 = xn_1 - (f(xn_1)*(xn - xn_1))/(f(xn)-f(xn_1))
         err = abs((xn_2 - xn_1)/xn_2)
         xn,xn_1= xn_1,xn_2
-        print("tried again secant")
+        #print("tried again secant")
     return xn_2
 
-print(secant(R,1.99*R,0.01))
+#print(secant(R,1.99*R,0.01))
 
 
 """
@@ -391,18 +391,28 @@ def NewtonRaph(x0,tol):
         xn_1 = xn - 2*f(xn)/df(xn)
         err = abs((xn_1 - xn)/xn_1)
         xn = xn_1
-        print("tryin again")
+        #print("tryin again")
     return xn
 
-print(NewtonRaph(1.2,0.01))
+#print(NewtonRaph(1.2,0.01))
 
 
 """
 2D Integration of Royal Albert Hall
 """
 
-# Task E
-import numpy as np
+# function trapz: compute numerical integration with trapezium rule, for nodes at any distance
+def trapz(x,y):
+    # get the number of subintervals
+    N = len(x) - 1
+    # compute the integral
+    # set range for the trapezia: there are as many trapezia as the number of intervals
+    R = range(0,N)
+    S = 0
+    for i in R:
+        # compute the area of this single trapezium (remind yourself the area of a trapezium)
+        S += 0.5 * (y[i+1] + y[i]) * (x[i+1] - x[i])
+    return S
 
 a = 67 # major axis
 b = 56 # minor axis
@@ -438,11 +448,126 @@ for i in range(0,N):
 # integrate G(x) in dx
 I = trapz(x,G)
 
-print(I)
+# for an emisphere the volume is:
+#print((4/3*np.pi*a*b*h)/2)
+
+
+"""
+3D Integration of an aerofoil
+"""
+
+data = {}
+
+def read_lines(filename):
+    with open(filename, 'r') as f:
+        return f.readlines()
+
+# Helper: clean & convert strings to float (rounded), skip invalids
+def clean_floats(lines):
+    cleaned = []
+    for line in lines:
+        parts = line.strip().replace(',', ' ').split()  # convert commas to spaces first
+        row = []
+        for part in parts:
+            try:
+                row.append((float(part)))
+            except ValueError:
+                continue
+        if row:
+            cleaned.append(row)
+    return cleaned
+
+
+# File mapping: variable name -> path
+file_map = {
+    'Aero': 'txt_Data/Aerofoil.txt',
+}
+
+# Load and clean files into variables
+for var, path in file_map.items():
+    raw_lines = read_lines(path)
+    #print(f"{var} raw:", raw_lines[:3])  # Preview first 3 lines
+
+    cleaned_vals = clean_floats(raw_lines)
+    #print(f"{var} cleaned:", cleaned_vals[:3])  # Preview cleaned data
+
+    data[var] = cleaned_vals
+
+AeroAll = data['Aero']
+print("Aeroall",AeroAll)
+print("Just tn=12: ", AeroAll[12]) # just giving a number gives that row eg x,y,zt,zb
+x_terms = [item[0] for item in AeroAll] # just x values for each point etc
+y_terms = [item[1] for item in AeroAll]
+Zt_terms = [item[2] for item in AeroAll] # top surface
+Zb_terms = [item[3] for item in AeroAll] # bottom surface
+
+
+# plot the aerofoil
+
+# set domain by using the two angles t and p
+# Create a mesh grid
+x = np.linspace(0,len(x_terms), 100) 
+y = np.linspace(0,len(y_terms),15)
+Theta, Phi = np.meshgrid(x,y)
+
+# Create a 3D surface plot
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+surf = ax.plot_surface(x_terms, y_terms, Zt_terms, cmap='Oranges')
+
+# Set labels and title
+ax.set_title('Top of Aerofoil')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_aspect('equal')
+ax.view_init(15, 60)
+# function trapz: compute numerical integration with trapezium rule, for nodes at any distance
+def trapz(x,y):
+    # get the number of subintervals
+    N = len(x) - 1
+    # compute the integral
+    # set range for the trapezia: there are as many trapezia as the number of intervals
+    R = range(0,N)
+    S = 0
+    for i in R:
+        # compute the area of this single trapezium (remind yourself the area of a trapezium)
+        S += 0.5 * (y[i+1] + y[i]) * (x[i+1] - x[i])
+    return S
+
+a = 67 # major axis
+b = 56 # minor axis
+h = 25 # minor axis
+
+# set the step intervals in x and y
+dx = 0.5
+dy = 0.5
+
+# set the x range, not including the boundaries
+x = np.arange(-a+dx,a,dx)
+N = len(x)
+# the y range depends of the various values of x, and cannot be fixed here
+
+# integrate in dy, for all the value of x, i.e. find G(x)
+
+G = np.zeros(N)
+# for every x
+for i in range(0,N):
+    # determine the boundaries m and p for this x
+    mx = np.sqrt(b**2*(1-x[i]**2/a**2))
+    px = mx
+    # set the y points for this x, not including the boundaries
+    y = np.arange(-mx+dy,px,dy)
+    z = np.zeros(len(y))
+    # determine the values of the function z(x,y)
+    for j in range(0,len(y)):
+        z[j] = np.sqrt(h**2*(1-x[i]**2/a**2-y[j]**2/b**2)) 
+    
+    # integrate in dy from cx to dx (for this specific x)
+    G[i] = trapz(y,z) # G(x)
+
+# integrate G(x) in dx
+I = trapz(x,G)
 
 # for an emisphere the volume is:
-print((4/3*np.pi*a*b*h)/2)
-
-"""
-
-"""
+#print((4/3*np.pi*a*b*h)/2)
