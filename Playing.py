@@ -451,10 +451,12 @@ I = trapz(x,G)
 # for an emisphere the volume is:
 #print((4/3*np.pi*a*b*h)/2)
 
-
 """
 3D Integration of an aerofoil
 """
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 data = {}
 
@@ -470,13 +472,12 @@ def clean_floats(lines):
         row = []
         for part in parts:
             try:
-                row.append((float(part)))
+                row.append(float(part))
             except ValueError:
                 continue
         if row:
             cleaned.append(row)
     return cleaned
-
 
 # File mapping: variable name -> path
 file_map = {
@@ -486,88 +487,62 @@ file_map = {
 # Load and clean files into variables
 for var, path in file_map.items():
     raw_lines = read_lines(path)
-    #print(f"{var} raw:", raw_lines[:3])  # Preview first 3 lines
-
     cleaned_vals = clean_floats(raw_lines)
-    #print(f"{var} cleaned:", cleaned_vals[:3])  # Preview cleaned data
-
     data[var] = cleaned_vals
 
 AeroAll = data['Aero']
-print("Aeroall",AeroAll)
-print("Just tn=12: ", AeroAll[12]) # just giving a number gives that row eg x,y,zt,zb
-x_terms = [item[0] for item in AeroAll] # just x values for each point etc
+print("Aeroall:", AeroAll)
+print("Just tn=12:", AeroAll[12])
+
+x_terms = [item[0] for item in AeroAll]
 y_terms = [item[1] for item in AeroAll]
-Zt_terms = [item[2] for item in AeroAll] # top surface
-Zb_terms = [item[3] for item in AeroAll] # bottom surface
-
-
-# plot the aerofoil
-
-# set domain by using the two angles t and p
-# Create a mesh grid
-x = np.linspace(0,len(x_terms), 100) 
-y = np.linspace(0,len(y_terms),15)
-Theta, Phi = np.meshgrid(x,y)
+Zt_terms = [item[2] for item in AeroAll]  # top surface
+Zb_terms = [item[3] for item in AeroAll]  # bottom surface
 
 # Create a 3D surface plot
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-surf = ax.plot_surface(x_terms, y_terms, Zt_terms, cmap='Oranges')
+# You need to reshape or simulate a meshgrid, but for now, just scatter top surface
+ax.plot_trisurf(x_terms, y_terms, Zt_terms, cmap='Oranges')
 
 # Set labels and title
 ax.set_title('Top of Aerofoil')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
-ax.set_aspect('equal')
 ax.view_init(15, 60)
+
 # function trapz: compute numerical integration with trapezium rule, for nodes at any distance
-def trapz(x,y):
-    # get the number of subintervals
+def trapz(x, y):
     N = len(x) - 1
-    # compute the integral
-    # set range for the trapezia: there are as many trapezia as the number of intervals
-    R = range(0,N)
+    R = range(0, N)
     S = 0
     for i in R:
-        # compute the area of this single trapezium (remind yourself the area of a trapezium)
-        S += 0.5 * (y[i+1] + y[i]) * (x[i+1] - x[i])
+        S += 0.5 * (y[i + 1] + y[i]) * (x[i + 1] - x[i])
     return S
 
-a = 67 # major axis
-b = 56 # minor axis
-h = 25 # minor axis
+a = 67  # major axis
+b = 56  # minor axis
+h = 25  # height
 
-# set the step intervals in x and y
 dx = 0.5
 dy = 0.5
 
-# set the x range, not including the boundaries
-x = np.arange(-a+dx,a,dx)
+x = np.arange(-a + dx, a, dx)
 N = len(x)
-# the y range depends of the various values of x, and cannot be fixed here
-
-# integrate in dy, for all the value of x, i.e. find G(x)
 
 G = np.zeros(N)
-# for every x
-for i in range(0,N):
-    # determine the boundaries m and p for this x
-    mx = np.sqrt(b**2*(1-x[i]**2/a**2))
-    px = mx
-    # set the y points for this x, not including the boundaries
-    y = np.arange(-mx+dy,px,dy)
+
+for i in range(N):
+    mx = np.sqrt(b**2 * (1 - x[i]**2 / a**2))
+    y = np.arange(-mx + dy, mx, dy)
     z = np.zeros(len(y))
-    # determine the values of the function z(x,y)
-    for j in range(0,len(y)):
-        z[j] = np.sqrt(h**2*(1-x[i]**2/a**2-y[j]**2/b**2)) 
-    
-    # integrate in dy from cx to dx (for this specific x)
-    G[i] = trapz(y,z) # G(x)
+    for j in range(len(y)):
+        term = 1 - x[i]**2 / a**2 - y[j]**2 / b**2
+        z[j] = np.sqrt(h**2 * term) if term >= 0 else 0
+    G[i] = trapz(y, z)
 
-# integrate G(x) in dx
-I = trapz(x,G)
+I = trapz(x, G)
+print("Integrated volume I =", I)
 
-# for an emisphere the volume is:
-#print((4/3*np.pi*a*b*h)/2)
+#plt.show()
