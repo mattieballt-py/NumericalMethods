@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import matplotlib.image as mpimg
 import csv # for writing
+import math as mt 
 
 """
 Dealing with csv's
@@ -652,3 +653,104 @@ xn = np.arange(0,13+dx,dx)
 def circ(xn): # (x - 3)^2 + y^2 = 10^2
     return (100 - (xn-3)**2)**0.5
 
+
+def TrapInt(h,N,y_known):
+    I = 0 # init
+    for n in range(1,N):
+        I += y_known[n] 
+    I = h*(I + y_known[0]/2 + y_known[-1]/2)
+    return I
+
+N = len(xn)
+yn = circ(xn)
+I1 = TrapInt(dx,N,yn) # this gives area under circle from x = 0 to 13
+
+# Red curve function, clipped to only keep positive y-values
+def yfunc(xn, n):
+    y = 5 * np.sin((2 * mt.pi * n * xn) / 13) * np.exp(-xn / 10)
+    y[y < 0] = 0
+    return y
+ns = np.array([0,2,4,1,3,4,0,0])
+
+I=[] # list to store integral values of area for each n
+for i in range(0,len(ns)):
+    I +=[TrapInt(h,N,yfunc(xn,ns[i]))]
+         
+Itot = [] # list of final intervals for each n
+for j in range(0,8):
+    Itot += [I1 - I[j]]
+
+print("I",I,"Itot",Itot,"I1",I1)
+plt.figure(figsize=(10, 5))
+plt.scatter(ns, Itot, label='Int', linewidth=2)
+plt.xlabel("n")
+plt.ylabel("I")
+plt.title("Integral area with trap rule for various n's")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# clearer: 
+# Define the function y = 5sin((2π/13) * n * x) * exp(-x/10)
+def red_function(x, n):
+    return 5 * np.sin((2 * np.pi * n * x) / 13) * np.exp(-x / 10)
+
+# Define the upper boundary of the circle (since the circle is symmetric about x-axis)
+def circle_upper(x):
+    return np.sqrt(100 - (x-3)**2)  # from x^2 + y^2 = 100 => y = sqrt(100 - x^2)
+
+# Trapezoidal rule implementation
+def trapezoidal_rule(x, y):
+    return np.trapz(y, x)
+
+# Set up the x range and step size
+x = np.arange(0, 13, 0.01)
+
+# Values of n to evaluate (1st to 8th digit of student CID)
+n_values = ns
+areas = []
+
+# Calculate area between circle and red curve for each n
+for n in n_values:
+    y_curve = red_function(x, n)
+    y_circle = circle_upper(x)
+
+    # Ensure we're only integrating where the curve is below the circle
+    diff = y_circle - y_curve
+    diff[diff < 0] = 0  # Ignore negative area (i.e., where curve is above circle)
+
+    area = trapezoidal_rule(x, diff)
+    areas.append(area)
+
+    print(f"n = {n}, Area = {area:.4f}")
+
+# Plotting the results
+plt.figure(figsize=(10, 5))
+plt.scatter(n_values, areas, marker='o', linestyle='-', color='green')
+plt.title("Area Between Circle and Red Curve vs n")
+plt.xlabel("n (digit of CID)")
+plt.ylabel("Area (using Trapezoidal Rule)")
+plt.grid(True)
+plt.show()
+
+
+#prof answer int between two lines:
+#Generate domain of integration and eqn for circle:
+R = 10
+dx = 0.01
+x = np.arange(0,13+dx,dx)
+yup = np.sqrt(R**2-(x-3)**2)
+#Area of circle:
+Sup = TrapInt(dx,len(x),yup)
+#Loop for every digit of the CID:
+S = []
+Rn = [0,1,2,3,4,5,6,7,8,9]
+for n in Rn:
+    yt = 5*np.sin(2*np.pi/13*n*x)*np.exp(-x/10)
+    ydown = np.zeros(len(x))
+    ydown[yt>=0] = yt[yt>=0]
+    Sdown = TrapInt(dx,len(x),ydown) 
+
+    S += [Sup-Sdown]
+print("profs s",S)

@@ -97,8 +97,9 @@ plt.grid(True)
 plt.show()
 
 
-import numpy as np
-import matplotlib.pyplot as plt
+"""
+ODE 2nd Order Fwd Euler
+"""
 
 # --------------------------------------
 # Set parameters and initial conditions
@@ -146,3 +147,43 @@ plt.grid(True)
 plt.legend()
 plt.tight_layout()
 plt.show()
+
+
+"""
+Two Var FWD Euler
+"""
+# if u have initial value problem d^2y/dx^2 + dy/dxy + x = 0
+# make w = dy/dx to have two vars, w and dw/dx
+# then:
+
+def func1(x,y):
+    f = y[1] # w = dy/dt
+    return f
+
+def func2(x,y):
+    f = -5*x*y[1]-(x+7)*np.sin(x)
+    return f
+
+# set initial conditions:
+y0 = np.ndarray(2)
+y0[0] = 4 # initial y
+y0[1]=3 # initial dy/dx
+
+def FwEulerTwo(Y0,t0,tend,h):
+ # compose nodal times
+ t = np.arange(t0,tend+h,h)
+ # determine the number of time steps
+ N = len(t)
+ # allocate output array
+ Y = np.ndarray((2,N))
+ # initialise the solution
+ t[0] = t0
+ Y[0,0] = Y0[0]
+ Y[1,0] = Y0[1]
+ # compute the solution incrementally at subsequent time steps
+ for n in range(1,N):
+ Y[0,n] = Y[0,n-1] + func1(t[n-1],Y[:,n-1]) * h
+ Y[1,n] = Y[1,n-1] + func2(t[n-1],Y[:,n-1]) * h
+ return (t,Y)
+
+(x,y) = FwEulerTwo(y0,0,15,0.02)
