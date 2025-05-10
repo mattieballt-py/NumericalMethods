@@ -182,8 +182,8 @@ def FwEulerTwo(Y0,t0,tend,h):
  Y[1,0] = Y0[1]
  # compute the solution incrementally at subsequent time steps
  for n in range(1,N):
- Y[0,n] = Y[0,n-1] + func1(t[n-1],Y[:,n-1]) * h
- Y[1,n] = Y[1,n-1] + func2(t[n-1],Y[:,n-1]) * h
+    Y[0,n] = Y[0,n-1] + func1(t[n-1],Y[:,n-1]) * h
+    Y[1,n] = Y[1,n-1] + func2(t[n-1],Y[:,n-1]) * h
  return (t,Y)
 
 (x,y) = FwEulerTwo(y0,0,15,0.02)
