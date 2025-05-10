@@ -21,14 +21,19 @@ plt.axis('off')  # Hide axes
 
 # 2) Render blue and red
 # img_matrix is 333x500 matrix and rgb, top triangle only b, bottom only r
+slope = (np.shape(img_matrix)[0])/(np.shape(img_matrix)[1])
 # looping through each pixel
 for i in range(0,(np.shape(img_matrix)[0])): # going down height
     for j in range(0,(np.shape(img_matrix)[1])): # going along width half way
-        if i>j: # in bottom triangle
-            img_mod[i,j,1]=0 # remove green
-            img_mod[i,j,2]=0 # remove blue
-        if i+j<np.shape(img_matrix)[0]: # in bottom triangle
-            img_mod[i,j,1]=0 # remove green
-            img_mod[i,j,0]=0 # remove red
+        # Top triangle → BLUE (remove red and green)
+        if i < slope * j and i < (np.shape(img_matrix)[0]) - slope * j:
+            img_mod[i, j, 0] = 0  # red off
+            img_mod[i, j, 1] = 0  # green off
 
-img_sml = plt.imsave('mattiesbanksy.jpg',img_mod)
+        # Bottom triangle → RED (remove green and blue)
+        elif i > slope * j and i > (np.shape(img_matrix)[0]) - slope * j:
+            img_mod[i, j, 1] = 0  # green off
+            img_mod[i, j, 2] = 0  # blue off
+
+plt.imsave('mattiesbanksy.jpg',img_mod)
+

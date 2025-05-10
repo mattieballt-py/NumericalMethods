@@ -75,7 +75,7 @@ def explicitWave(x,t,U,r): # with BC's set up as tutorial question
     return U
 
 diff = explicitWave(x,t,U,r)
-#print(diff)
+print(diff)
 
 """
 # Plot results
@@ -352,7 +352,7 @@ plt.title('Barycentric Interpolation (Simple Visual Test)')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.grid(True)
-#plt.show()
+plt.show()
 
 ## with secant method:
 
@@ -368,7 +368,7 @@ def secant(x0,x1,tol): # two initial guesses
         #print("tried again secant")
     return xn_2
 
-#print(secant(R,1.99*R,0.01))
+print(secant(R,1.99*R,0.01))
 
 
 """
@@ -449,7 +449,7 @@ for i in range(0,N):
 I = trapz(x,G)
 
 # for an emisphere the volume is:
-#print((4/3*np.pi*a*b*h)/2)
+print((4/3*np.pi*a*b*h)/2)
 
 """
 3D Integration of an aerofoil
@@ -545,4 +545,110 @@ for i in range(N):
 I = trapz(x, G)
 print("Integrated volume I =", I)
 
-#plt.show()
+plt.show()
+
+
+"""
+Langrangian for CID no. Points
+"""
+
+xn = np.arange(1,9) # xn points 1,2,3,4,5,6,7,8
+yn = np.array([0,2,4,1,3,4,0,0])
+
+dx = 0.1
+xp = np.arange(1,8+dx,dx)# from 1 to 8 with dx=0.1 steps
+
+def Langrangian(x_known, y_known, xp):
+    n = len(x_known) # the degree of P polynomial
+    #print("n",n)
+    P = 0 # init this is the Langrangian Polynomial
+    Li = 1
+    for i in range(0,n):
+        #print("i",i)
+        for j in range(0,n):
+            if i != j:
+                #print("j",j)
+                Li *= (xp - x_known[j])/(x_known[i]-x_known[j])
+        P += y_known[i] * Li
+        Li = 1
+    return P
+
+def InterpPoints(x_known,y_known, InterpMethod, xp_points):
+    yp_points = xp_points.copy()
+    for i in range(0,len(xp_points)):
+        yp_points[i] = InterpMethod(x_known,y_known,xp_points[i])
+    return yp_points
+
+yp = InterpPoints(xn,yn,Langrangian,xp)
+print("interpolated lagrangian points: ",yp)
+
+# Plot results
+plt.figure(figsize=(10, 6))
+plt.scatter(xn,yn,c="red", s=20) # known (s = controls size of points)
+plt.scatter(xp,yp,c="blue", s=5) # interpolated
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Lagrnagian interpolation 0 to 8 with my CID')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+"""
+Solving a 2nd Order ODE
+"""
+# Set parameters and initial conditions
+x0 = 0
+x_end = 15
+dx = 0.02
+x = np.arange(x0, x_end + dx, dx)
+
+# Initial conditions (use your CID digits as required)
+y0 = 4      # y(0) = 3rd digit of CID
+dy0 = 3     # y'(0) = 5th digit of CID
+
+# Initialize arrays
+y = np.zeros_like(x)
+dy = np.zeros_like(x)
+
+# Apply initial values
+y[0] = y0
+dy[0] = dy0
+
+# --------------------------------------
+# Define your second-order ODE here:
+# dy2 = f(x, y, dy)
+# --------------------------------------
+def f(x, y, dy):
+    return -5*x*dy - (x + 7)*np.sin(x)
+
+# --------------------------------------
+# Forward Euler Solver
+# --------------------------------------
+for i in range(1, len(x)):
+    y[i] = y[i-1] + dx * dy[i-1]
+    dy[i] = dy[i-1] + dx * f(x[i-1], y[i-1], dy[i-1])
+
+# --------------------------------------
+# Plotting
+# --------------------------------------
+plt.figure(figsize=(10, 5))
+plt.plot(x, y, label='y(x)', linewidth=2)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Forward Euler Solution to Second-Order ODE")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+
+"""
+Integrate Area between circle and a function
+"""
+dx = 0.01
+xn = np.arange(0,13+dx,dx)
+
+def circ(xn): # (x - 3)^2 + y^2 = 10^2
+    return (100 - (xn-3)**2)**0.5
+
