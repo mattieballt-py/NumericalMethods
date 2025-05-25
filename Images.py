@@ -32,8 +32,8 @@ for i in range(0,(np.shape(img_matrix)[0])): # going down height
 
         # Bottom triangle → RED (remove green and blue)
         elif i > slope * j and i > (np.shape(img_matrix)[0]) - slope * j:
-            img_mod[i, j, 1] = 0  # green off
-            img_mod[i, j, 2] = 0  # blue off
+            img_mod[i, j, 0] = 0  # green off
+            img_mod[i, j, 1] = 0  # blue off
 
 plt.imsave('mattiesbanksy.jpg',img_mod)
 

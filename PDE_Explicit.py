@@ -98,58 +98,6 @@ plt.show()
 
 
 """
-ODE 2nd Order Fwd Euler
-"""
-
-# --------------------------------------
-# Set parameters and initial conditions
-# --------------------------------------
-x0 = 0
-x_end = 15
-dx = 0.02
-x = np.arange(x0, x_end + dx, dx)
-
-# Initial conditions (use your CID digits as required)
-y0 = 3      # y(0) = 3rd digit of CID
-dy0 = 5     # y'(0) = 5th digit of CID
-
-# Initialize arrays
-y = np.zeros_like(x)
-dy = np.zeros_like(x)
-
-# Apply initial values
-y[0] = y0
-dy[0] = dy0
-
-# --------------------------------------
-# Define your second-order ODE here:
-# dy2 = f(x, y, dy)
-# --------------------------------------
-def f(x, y, dy):
-    return -5*x*dy - (x + 7)*np.sin(x)
-
-# --------------------------------------
-# Forward Euler Solver
-# --------------------------------------
-for i in range(1, len(x)):
-    y[i] = y[i-1] + dx * dy[i-1]
-    dy[i] = dy[i-1] + dx * f(x[i-1], y[i-1], dy[i-1])
-
-# --------------------------------------
-# Plotting
-# --------------------------------------
-plt.figure(figsize=(10, 5))
-plt.plot(x, y, label='y(x)', linewidth=2)
-plt.xlabel("x")
-plt.ylabel("y")
-plt.title("Forward Euler Solution to Second-Order ODE")
-plt.grid(True)
-plt.legend()
-plt.tight_layout()
-plt.show()
-
-
-"""
 Two Var FWD Euler
 """
 # if u have initial value problem d^2y/dx^2 + dy/dxy + x = 0
