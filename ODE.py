@@ -120,6 +120,38 @@ def newton_solver(f, dfdy, t_next, y_guess, y_prev, h, tol=1e-8, max_iter=50):
         y = y_new
     raise RuntimeError("Newton-Raphson did not converge")
 
+
+# bisection method recursively
+def bisecrecurs(a,b,tol,i):
+    if f(a)*f(b)>0: # check valid interval
+        print("choose new interval")
+        return None
+
+    n = (a + b)/2 #new point, bang in the middle of a and b
+    print('midpoint', n)
+
+    if f(a)*f(n)<0: # function changes sign between a and n
+        # best guess before was n, now n + 1 = (a + n)/2
+        # err = (new - old) /new
+        errnew = (((a + n)/2) - n)/((a + n)/2)
+        if abs(errnew) < tol:
+            return ((a + n)/2) # if interval less than min, the root is at centre of it ish
+        else:
+            i += 1
+            print(i)
+        return bisecrecurs(a,n,tol,i)
+  
+    else:  # function changes sign between n and b
+        errnew = (((n + b)/2) - n)/((n + b)/2)
+        if abs(errnew) < tol:
+            return ((n + b)/2) # if interval less than min, the root is at centre of it ish
+        i += 1
+        print(i)
+        return bisecrecurs(n,b,tol,i)
+
+
+print(bisecrecurs(0,2*0.3,0.001,1))
+
 # Backward Euler method using Newton-Raphson
 def BWDEuler(y0, t0, h, t_final):
     t_values = [t0]

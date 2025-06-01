@@ -1,34 +1,87 @@
 # CID: 02413400
+# Fourier Transform Task A
 
-# importing libraries:
 import numpy as np
-import matplotlib.pyplot as plt  
-import math as mt
+import matplotlib.pyplot as plt
 
-"""
-Task A: Signals and fourier transform
-"""
+# (a) Plot each component y_k(t)
+t = np.arange(0, 2*np.pi, 0.01)
+N = len(t)
 
-t = np.arange(0, 2*mt.pi,0.01)
+A_k = [5, 2, 0, 3, 1, 8, 2, 3, 7, 6]  # amplitudes
+phi_k = [np.pi/2, np.pi, 0, 0, 3*np.pi/2, np.pi, 0, 3*np.pi/2, np.pi, 0]  # phases
 
-yts = [5*np.sin(t*mt.pi/2), 2*np.sin(t*mt.pi), 0*np.sin(t*mt.pi/2), 3*np.sin(t), 1*np.sin(3*t*mt.pi/2), 8*np.sin(t*mt.pi), 2*np.sin(t*0), 3*np.sin(3*t*mt.pi/2), 7*np.sin(t*mt.pi), 6*np.sin(t*0)]
-for i in range(0,len(yts)):
-    pl1 = plt.scatter(t,yts[i],s=2)
-plt.title('Plot 1, components of y(t)')
-plt.xlabel('t')
-plt.ylabel('y')
-plt.legend()
+components = []
+
+plt.figure(figsize=(10, 6))
+for k in range(1, 11):
+    y_k = A_k[k-1] * np.sin(k * t + phi_k[k-1])
+    components.append(y_k)
+    plt.plot(t, y_k, label=f"$y_{k}(t)$")
+
+plt.title("(a) Components $y_k(t)$")
+plt.xlabel("t")
+plt.ylabel("Amplitude")
 plt.grid(True)
+plt.legend(fontsize='small')
+plt.tight_layout()
 plt.show()
 
-# task b) plot sum of all components
-yt = 5*np.sin(t*mt.pi/2) + 2*np.sin(t*mt.pi) + 0*np.sin(t*mt.pi/2) + 3*np.sin(t) + 1*np.sin(3*t*mt.pi/2) + 8*np.sin(t*mt.pi) + 2*np.sin(t*0) + 3*np.sin(3*t*mt.pi/2) + 7*np.sin(t*mt.pi) + 6*np.sin(t*0)
-pl2 = plt.scatter(t,yt,s=3)
-plt.title('Plot 2, yt sum of components')
-plt.xlabel('t')
-plt.ylabel('y')
-plt.legend()
+# (b) Plot total signal y(t)
+y_total = sum(components)
+
+plt.figure(figsize=(8, 4))
+plt.plot(t, y_total, color='black')
+plt.title("(b) Total Signal $y(t)$")
+plt.xlabel("t")
+plt.ylabel("y(t)")
 plt.grid(True)
+plt.tight_layout()
 plt.show()
 
-# c) discrete fourier transform:
+# (c) Compute DFT and frequency data
+
+def DFT(yn):
+    # y: values of the function, in time domain
+    N = len(yn)
+    w = 2*np.pi/N
+    FTk = np.zeros(N,dtype=complex)
+    for k in range(0,N):
+        for n in range(0,N):
+            FTk[k] += np.exp(-1j*k*w*n)*yn[n]
+    return FTk
+
+Y = DFT(y_total)
+mag = np.abs(Y)
+phase = np.angle(Y)
+freq = np.fft.fftfreq(N, d=0.01)
+half = N // 2
+Δf = freq[1] - freq[0]
+
+# (c) Plot DFT Magnitude – bar chart
+plt.figure(figsize=(8, 4))
+plt.bar(freq[:half], mag[:half], width=Δf, color='blue', edgecolor='black')
+plt.title("(c) DFT Magnitude Spectrum")
+plt.xlabel("Frequency [Hz]")
+plt.ylabel("|Y(f)|")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# (c) Plot DFT Phase – bar chart
+plt.figure(figsize=(8, 4))
+plt.bar(freq[:half], phase[:half], width=Δf, color='orange', edgecolor='black')
+plt.title("(c) DFT Phase Spectrum")
+plt.xlabel("Frequency [Hz]")
+plt.ylabel("Phase [rad]")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# (d) Print frequency resolution info
+f_min = np.min(freq[:half])
+f_max = np.max(freq[:half])
+print(f"(d) Frequency step Δf = {Δf:.4f} Hz")
+print(f"    Minimum frequency = {f_min:.2f} Hz")
+print(f"    Maximum frequency = {f_max:.2f} Hz")
+

@@ -4,7 +4,7 @@ import math as mt
 import cmath  # For complex exponential
 
 """
-Task B: Anologue Filters and Bode Plots
+Anologue Filters and Bode Plots
 """
 inc = np.arange(1,5) # 1,2,3,4
 x = np.log10(10**inc)
