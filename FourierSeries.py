@@ -237,6 +237,7 @@ plt.show()
 """
 Task E: Signal Processing
 """
+"""
 from scipy.signal import butter, filtfilt
 
 with open('Vibration.txt', 'r') as d:
@@ -282,7 +283,8 @@ plt.xlabel("Frequency (Hz)")
 plt.ylabel("Magnitude")
 plt.grid(True)
 plt.show()
-
+"""
+"""
 
 # Convert data to float array
 Noisy = np.array([float(item.strip()) for item in Nos])
@@ -324,7 +326,7 @@ plt.ylabel("Signal Amplitude")
 plt.title("Noisy vs. Filtered Signal")
 plt.grid(True)
 plt.show()
-
+"""
 
 """
 Own, active low pass filter
@@ -388,8 +390,10 @@ N = 1024  # Sample points
 t = np.linspace(0, 1, N, endpoint=False)
 y = np.sin(2 * np.pi * t) + np.sin(6 * np.pi * t)
 Y = dft(y)
-frequencies = dft(N, d=1/N)
+frequencies = dft(y)
+frequencies = np.array(frequencies)  # <-- convert to NumPy array
 idx = np.argmin(np.abs(frequencies - 0.3684))
+
 value_at_f = Y[idx].real  # Taking real part for amplitude
 #print("Question 4 Answer:", round(value_at_f, 2))
 
@@ -408,10 +412,104 @@ clean_signal = low_pass_filter(noisy_signal, cutoff_freq, sampling_rate)
 clean_value_t5 = np.interp(5, time, clean_signal)
 #print("Question 5 Answer:", round(clean_value_t5, 2))
 
-
-
 # for running scripts you're unsure will work:
 # try:
     # print something?
 # except:
     # something else it runs
+
+# phase angle experimentation:
+
+t = np.arange(0, 1, 0.01)
+ω = 2 * np.pi * 5  # 5 Hz
+φ = 0.1              # phase shift in radians
+x = np.cos(ω * t + φ)
+
+# Compute DFT
+X = np.fft.fft(x)
+freqs = np.fft.fftfreq(len(t), d=0.01)
+
+# Find index of 5 Hz component
+k = np.argmax(np.abs(X))  # or use np.where(np.isclose(freqs, 5))[0]
+
+# Extract phase
+phase = np.angle(X[k])
+print(f"Recovered phase (rad): {phase:.3f}")
+
+
+
+# TIME DOMAIN SETUP
+# Create a time array from 0 to 1 second, sampled at 100 Hz
+fs = 100  # Sampling frequency in Hz
+T = 1     # Total time in seconds
+N = int(T * fs)
+t = np.linspace(0, T, N, endpoint=False)  # Time vector
+Δt = t[1] - t[0]  # Time step
+
+# SIGNAL CONSTRUCTION 
+# Example: y(t) = 3*cos(2π*5t + π/3) + 2*sin(2π*10t)
+# Use sinusoids with phase shifts
+f1, A1, phi1 = 5, 3, np.pi / 3 # f is freq, A1 is mag A
+f2, A2, phi2 = 10, 2, 0  # sin(ωt) = cos(ωt - π/2)
+
+y1 = A1 * np.cos(2 * np.pi * f1 * t + phi1)
+y2 = A2 * np.sin(2 * np.pi * f2 * t)  # Can also convert to cos(ωt + φ)
+
+y = y1 + y2
+
+# PLOT TIME-DOMAIN SIGNAL
+plt.figure()
+plt.plot(t, y)
+plt.title("Signal $y(t)$")
+plt.xlabel("Time [s]")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# DISCRETE FOURIER TRANSFORM 
+# Manual DFT function (for small N)
+def DFT(y):
+    N = len(y)
+    Y = np.zeros(N, dtype=complex)
+    for k in range(N):
+        for n in range(N):
+            Y[k] += y[n] * np.exp(-2j * np.pi * k * n / N)
+    return Y
+
+# Or use FFT (Fast Fourier Transform)
+Y = np.fft.fft(y)
+freqs = np.fft.fftfreq(N, d=Δt)
+
+# MAGNITUDE & PHASE
+magnitude = np.abs(Y)
+phase = np.angle(Y)
+
+# Plot only the positive half of the spectrum
+half = N // 2
+
+# PLOT MAGNITUDE SPECTRUM 
+plt.figure()
+plt.scatter(freqs[:half], magnitude[:half], edgecolor='black')
+plt.title("Magnitude Spectrum $|Y(f)|$")
+plt.xlabel("Frequency [Hz]")
+plt.ylabel("Magnitude")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# PLOT PHASE SPECTRUM 
+plt.figure()
+plt.scatter(freqs[:half], phase[:half], color='orange', edgecolor='black')
+plt.title("Phase Spectrum $\\angle Y(f)$")
+plt.xlabel("Frequency [Hz]")
+plt.ylabel("Phase [rad]")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# IDENTIFY MAIN FREQUENCIES
+# Find top 2 peaks
+top_indices = np.argsort(magnitude[:half])[-2:]
+for idx in top_indices:
+    print(f"Frequency: {freqs[idx]:.2f} Hz, Magnitude: {magnitude[idx]:.2f}, Phase: {phase[idx]:.2f} rad")

@@ -85,3 +85,6 @@ print(f"(d) Frequency step Δf = {Δf:.4f} Hz")
 print(f"    Minimum frequency = {f_min:.2f} Hz")
 print(f"    Maximum frequency = {f_max:.2f} Hz")
 
+# I hate Task A
+
+# Task C
