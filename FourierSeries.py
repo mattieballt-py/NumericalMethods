@@ -1,44 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt 
-import math
+import math as mt
 import cmath  # For complex exponential
-
-"""
-Discrete Fourier Series
-"""
-
-# Question 4: Discrete Fourier Transform at f = 0.3684
-N = 1024  # Sample points
-t = np.linspace(0, 1, N, endpoint=False)
-y = np.sin(2 * np.pi * t) + np.sin(6 * np.pi * t)
-Y = fft(y)
-frequencies = fftfreq(N, d=1/N)
-idx = np.argmin(np.abs(frequencies - 0.3684))
-value_at_f = Y[idx].real  # Taking real part for amplitude
-#print("Question 4 Answer:", round(value_at_f, 2))
-
-# Question 5: Filtering a Noisy Signal
-def low_pass_filter(signal, cutoff_freq, sampling_rate):
-    freqs = np.fft.fftfreq(len(signal), 1/sampling_rate)
-    spectrum = np.fft.fft(signal)
-    spectrum[np.abs(freqs) > cutoff_freq] = 0
-    return np.fft.ifft(spectrum).real
-
-sampling_rate = 100
-cutoff_freq = 0.5
-time = np.linspace(0, 10, sampling_rate * 10)
-noisy_signal = np.sin(2 * np.pi * 1.0 * time) + 0.5 * np.random.randn(len(time))  # Simulated noisy signal
-clean_signal = low_pass_filter(noisy_signal, cutoff_freq, sampling_rate)
-clean_value_t5 = np.interp(5, time, clean_signal)
-#print("Question 5 Answer:", round(clean_value_t5, 2))
-
-
-
-# for running scripts you're unsure will work:
-# try:
-    # print something?
-# except:
-    # something else it runs
 
 """
 Task B: Anologue Filters and Bode Plots
@@ -165,7 +128,7 @@ plt.show()
 """
 
 """
-Task C: Fourier Series
+Fourier Series
 """
 
 def FourierSqr(t, N, T):
@@ -199,7 +162,7 @@ plt.show()
 """
 
 """
-Task D: Discrete Fourier Transform
+Discrete Fourier Transform
 """
 
 
@@ -253,9 +216,9 @@ def dft(y):
         real_part = 0
         imag_part = 0
         for n in range(N):
-            angle = 2 * math.pi * k * n / N
-            real_part += y[n] * math.cos(-angle)
-            imag_part += y[n] * math.sin(-angle)
+            angle = 2 * mt.pi * k * n / N
+            real_part += y[n] * mt.cos(-angle)
+            imag_part += y[n] * mt.sin(-angle)
         Y.append(complex(real_part, imag_part))
 
     return Y
@@ -414,3 +377,41 @@ plt.grid()
 
 plt.tight_layout()
 plt.show()
+
+
+"""
+Discrete Fourier Series
+"""
+
+# Question 4: Discrete Fourier Transform at f = 0.3684
+N = 1024  # Sample points
+t = np.linspace(0, 1, N, endpoint=False)
+y = np.sin(2 * np.pi * t) + np.sin(6 * np.pi * t)
+Y = dft(y)
+frequencies = dft(N, d=1/N)
+idx = np.argmin(np.abs(frequencies - 0.3684))
+value_at_f = Y[idx].real  # Taking real part for amplitude
+#print("Question 4 Answer:", round(value_at_f, 2))
+
+# Question 5: Filtering a Noisy Signal
+def low_pass_filter(signal, cutoff_freq, sampling_rate):
+    freqs = np.fft.fftfreq(len(signal), 1/sampling_rate)
+    spectrum = np.fft.fft(signal)
+    spectrum[np.abs(freqs) > cutoff_freq] = 0
+    return np.fft.ifft(spectrum).real
+
+sampling_rate = 100
+cutoff_freq = 0.5
+time = np.linspace(0, 10, sampling_rate * 10)
+noisy_signal = np.sin(2 * np.pi * 1.0 * time) + 0.5 * np.random.randn(len(time))  # Simulated noisy signal
+clean_signal = low_pass_filter(noisy_signal, cutoff_freq, sampling_rate)
+clean_value_t5 = np.interp(5, time, clean_signal)
+#print("Question 5 Answer:", round(clean_value_t5, 2))
+
+
+
+# for running scripts you're unsure will work:
+# try:
+    # print something?
+# except:
+    # something else it runs
