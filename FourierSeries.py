@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt 
+import math
+import cmath  # For complex exponential
 
 """
 Discrete Fourier Series
@@ -240,6 +242,23 @@ yaxis = np.abs(yaxis)
 
 # Frequency axis
 freqs = np.fft.fftfreq(len(tn), d=1)  # d is the time step
+
+
+
+def dft(y):
+    N = len(y)
+    Y = []
+
+    for k in range(N):
+        real_part = 0
+        imag_part = 0
+        for n in range(N):
+            angle = 2 * math.pi * k * n / N
+            real_part += y[n] * math.cos(-angle)
+            imag_part += y[n] * math.sin(-angle)
+        Y.append(complex(real_part, imag_part))
+
+    return Y
 
 """
 # Plot results
