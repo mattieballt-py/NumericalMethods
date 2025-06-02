@@ -164,5 +164,5 @@ def bisecrecurs(a, b, tol, i):
         return bisecrecurs(mid, b, tol, i + 1)
 
 # Call fixed bisection function over time interval [3, 3.5]
-root_time = bisecrecurs(3.0, 3.5, 0.01, 0)
+root_time = bisecrecurs(3.0, 3.5, 0.005, 0)
 print(f"Estimated root at time t = {root_time:.4f} s")

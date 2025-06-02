@@ -1,4 +1,6 @@
 # basically algorithms to find where f(x) = 0
+import numpy as np
+import matplotlib.pyplot as plt 
 
 """
 Bisection Method (1 of 2 Bracketing Methods)
