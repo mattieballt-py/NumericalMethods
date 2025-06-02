@@ -124,7 +124,7 @@ def FwEuler(Y0, t0, h, t_final):
 
     return np.array(t_values), np.array(y_values)
 
-# --- Initial conditions ---
+# Initial conditions
 y0_init = 5
 y1_init = 8
 y2_init = 3
@@ -132,19 +132,19 @@ y3_init = 10
 
 Y0 = np.array([y0_init, y1_init, y2_init, y3_init])
 
-# --- Time domain ---
+# Time domain
 t0 = 0
 t_final = 15
 h = 0.001
 
-# --- Solve using Euler method ---
+# Solve using Euler method
 t_vals, y_vals = FwEuler(Y0, t0, h, t_final)
 
-# --- Extract relevant components ---
+# Extract relevant components
 y_t = y_vals[:, 0]         # y(t)
 y2_t = y_vals[:, 2]        # d²y/dt²
 
-# --- Plot y(t) ---
+# Plot y(t)
 plt.figure(figsize=(10, 4))
 plt.plot(t_vals, y_t, label='y(t)')
 plt.xlabel('t')
@@ -155,7 +155,7 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 
-# --- Plot d²y/dt² ---
+#Plot d²y/dt²
 plt.figure(figsize=(10, 4))
 plt.plot(t_vals, y2_t, label='d²y/dt²', color='orange')
 plt.xlabel('t')
