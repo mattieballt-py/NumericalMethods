@@ -210,6 +210,51 @@ plt.show()
 
 
 """
-Task D
+Task D: bisection method to find intersection of two curves
 """
+# two functions 
+# for circle y1 = sqrt(r^2 - (x-4)^2)
+# for line y2 = x - 4
+# so want to solve Z = y1 - y2 and find where this =0 as this is when y1 = y2 bosh then sub in to find (x,y) of intersection
 
+
+def f1(x):
+    return (4**2 - (x-4)**2)**0.5
+def f2(x):
+    return (x - 4)
+
+def f(x):
+    return f1(x) - f2(x)
+
+# bisection method recursively
+def bisecrecurs(a,b,tol,i):
+    if f(a)*f(b)>0: # check valid interval
+        print("choose new interval")
+        return None
+
+    n = (a + b)/2 #new point, bang in the middle of a and b
+    print('midpoint', n)
+
+    if f(a)*f(n)<0: # function changes sign between a and n
+        # best guess before was n, now n + 1 = (a + n)/2
+        # err = (new - old) /new
+        errnew = (((a + n)/2) - n)/((a + n)/2)
+        if abs(errnew) < tol:
+            return ((a + n)/2) # if interval less than min, the root is at centre of it ish
+        else:
+            i += 1
+            print(i)
+        return bisecrecurs(a,n,tol,i)
+  
+    else:  # function changes sign between n and b
+        errnew = (((n + b)/2) - n)/((n + b)/2)
+        if abs(errnew) < tol:
+            return ((n + b)/2) # if interval less than min, the root is at centre of it ish
+        i += 1
+        print(i)
+        return bisecrecurs(n,b,tol,i)
+
+
+y = bisecrecurs(4,8,0.001,1) # choosing bracket from center of circle to the right, so dont get confused with root on lhs
+x = y + 4 # as using the line one
+# a, b is the interval to evaluate inside
