@@ -208,3 +208,45 @@ def bisecrecurs(a, b, tol, i):
 # Call fixed bisection function over time interval [3, 3.5]
 root_time = bisecrecurs(3.0, 3.5, 0.01, 0)
 print(f"Estimated root at time t = {root_time:.4f} s")
+
+
+"""
+Task D: bisection method to find intersection of two curves
+"""
+# two functions 
+# for circle y1 = sqrt(r^2 - (x-4)^2)
+# for line y2 = x - 4
+# so want to solve Z = y1 - y2 and find where this =0 as this is when y1 = y2 bosh then sub in to find (x,y) of intersection
+
+
+def f1(x):
+    return (4**2 - (x-4)**2)**0.5
+def f2(x):
+    return (x - 4)
+
+def f(x):
+    return f1(x) - f2(x)
+
+# bisection method recursively
+def bisecrecurs(a, b, tol, i):
+    if f(a) * f(b) > 0:
+        print("Choose new interval")
+        return None
+
+    n = (a + b) / 2
+    print('Midpoint:', n)
+
+    if f(a) * f(n) < 0:
+        errnew = abs(((a + n) / 2 - n) / ((a + n) / 2))
+        if errnew < tol:
+            return (a + n) / 2
+        return bisecrecurs(a, n, tol, i + 1)
+    else:
+        errnew = abs(((n + b) / 2 - n) / ((n + b) / 2))
+        if errnew < tol:
+            return (n + b) / 2
+        return bisecrecurs(n, b, tol, i + 1) # removed second eval to be more efficient
+
+y = bisecrecurs(4,8,0.001,1) # choosing bracket from center of circle to the right, so dont get confused with root on lhs
+x = y + 4 # as using the line one
+# a, b is the interval to evaluate inside
