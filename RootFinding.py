@@ -250,3 +250,8 @@ def bisecrecurs(a, b, tol, i):
 y = bisecrecurs(4,8,0.001,1) # choosing bracket from center of circle to the right, so dont get confused with root on lhs
 x = y + 4 # as using the line one
 # a, b is the interval to evaluate inside
+
+
+"""
+Task B: PDE Solving for two sections of ice cream heat diffusion
+"""

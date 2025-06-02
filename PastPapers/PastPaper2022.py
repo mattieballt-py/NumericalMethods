@@ -57,3 +57,5 @@ zA = bisecrecurs(0, 2 * R, 0.001, 1)
 xA = f1(zA)  # or f2(zA), both give x
 
 print("intersection at xA,zA",xA,zA)
+
+

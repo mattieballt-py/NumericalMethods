@@ -135,3 +135,86 @@ def FwEulerTwo(Y0,t0,tend,h):
  return (t,Y)
 
 (x,y) = FwEulerTwo(y0,0,15,0.02)
+
+
+"""
+Heat Diffusion PDE
+"""
+
+# this specific solution is from the ice cream Q, adjust paramaters, bc's etc as needed:
+# spatial domain (in mm)
+R = 30
+dx = 0.5 # spatial increment
+# greate the spatial grid points
+x = np.arange(-R,R+dx,dx)
+Nx = len(x)
+
+# temporal domain
+tend = 3600
+dt = 1 # temporal increment
+# create the temporal grid points
+t = np.arange(0,tend+dt,dt)
+Nt = len(t)
+
+# create the solution matrix
+T = np.ndarray((Nt,Nx))
+
+# set the physics
+# boundary conditions (fixed temperature at boundaries)
+Ta = 35
+Tb = 35
+# set the initial T for watermelon
+T[0,:int(Nx/2)] = 2
+# set the initial T for pistachio
+T[0,int(Nx/2):] = 6
+
+# set the thermal diffusivity
+alpha = np.ndarray(len(x))
+# set the diffusivity T for watermelon
+alpha[:int(Nx/2)] = 4.5e-2
+# set the diffusivity for pistachio
+alpha[int(Nx/2):] = 8.6e-2
+# ================================================
+
+averagep = np.average(T[0,int(Nx/2):])
+averagew = np.average(T[0,:int(Nx/2)])
+avp = [averagep]
+avw = [averagew]
+Tmelt = 15
+
+c = alpha * dt / dx**2
+
+# compute the solution incrementally at subsequent time steps
+k = 1
+while averagep < Tmelt:
+    # compute at time step p, i.e. t = k * dt
+    # do it for every node in the spatial grid
+    # start with the boundaries
+    T[k,0] = Ta
+    T[k,-1] = Tb
+    # do the interior nodes
+    for i in range(1,Nx-1):
+        # apply the discretised equation
+        T[k,i] = c[i] * ( T[k-1,i+1] + T[k-1,i-1] ) + (1 - 2*c[i]) * T[k-1,i]
+    averagep = np.average( T[k,int(Nx/2):])
+    averagew = np.average( T[k,:int(Nx/2)])
+    avp += [averagep]
+    avw += [averagew]
+    k += 1
+
+
+plt.plot(x,T[k-1,:])
+plt.grid()
+plt.show()
+
+
+plt.plot(t[:k],avp,c='Green')
+plt.plot(t[:k],avw,c='Red')
+plt.grid()
+plt.show()
+
+print('Ice cream melted after minutes:')
+print((k-1)*dt/60)
+
+print('Courant:')
+print(c[-1],c[0])
