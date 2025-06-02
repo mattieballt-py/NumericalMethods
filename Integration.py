@@ -123,13 +123,9 @@ def TrapInt(A,B,h,N,y_known):
 3D Integration – Cone and Torus
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
-"""
-1. Volume of a cone using Trapezium Rule
-"""
+#1. Volume of a cone using Trapezium Rule
+
 
 # define parameters for the cone
 A = 0      # lower limit (base)
@@ -204,9 +200,8 @@ dy = y[1] - y[0]
 V_torus = VolumeTorusMasked(Z, dx, dy)
 print("Volume of torus (numerical double integration):", V_torus)
 
-"""
-3. 3D Plot of Torus Surface of Revolution
-"""
+#3. 3D Plot of Torus Surface of Revolution
+
 
 # define upper semi-circle of torus profile
 x_profile = np.linspace(R - r, R + r, 200)
@@ -228,3 +223,31 @@ ax.set_ylabel('y')
 ax.set_zlabel('z')
 plt.tight_layout()
 plt.show()
+
+
+"""
+Generic 3D Integration using the Trapezium Rule
+Use: I = ∫∫ f(x, y) dx dy over grid
+"""
+
+# Example function: f(x, y) = x * y
+def f_3d(x, y):
+    return x * y
+
+# Define 2D grid
+x = np.linspace(0, 1, 100)
+y = np.linspace(0, 2, 100)
+X, Y = np.meshgrid(x, y)
+Z = f_3d(X, Y)
+
+def Trap3D(X, Y, Z):
+    dx = X[0,1] - X[0,0]
+    dy = Y[1,0] - Y[0,0]
+    I = 0
+    for i in range(1, Z.shape[0]-1):
+        for j in range(1, Z.shape[1]-1):
+            I += Z[i,j]
+    I *= dx * dy
+    return I
+
+print("Generic 3D integral (x*y over 0≤x≤1, 0≤y≤2):", Trap3D(X, Y, Z))
