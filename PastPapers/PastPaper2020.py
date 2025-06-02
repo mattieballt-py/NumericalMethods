@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt  
 import matplotlib.image as mpimg
 import csv # for writing
+import math as mt
 
 """
 Task A: Modify Banksy image colours
@@ -147,3 +148,81 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 
+
+"""
+Task D: 2D Trapazoidal Interpolation between two functions
+"""
+
+# create yn points for the circle
+def circ(xn,r):
+    return (r**2 - (xn-3)**2)**0.5
+
+dx = 0.01
+xn = np.arange(0,13+dx,dx)
+R = 10
+yn = circ(xn,R)
+# just to check circle correct
+plt.scatter(xn,yn) # looks right
+
+def TrapInt(A,B,x_known,y_known):
+    I = 0 # init
+    h = x_known[1] - x_known[0]
+    for n in range(1,len(y_known)):
+        I += y_known[n] 
+    I = h*(I + y_known[0] + y_known[-1]/2)
+    return I
+
+# Finding just area under circle that stays the same no matter n
+A_circ = TrapInt(0,13,xn,yn)
+
+# now for the sin wave
+# create yn points for the wave
+def sinf(x,n):
+    yn = (5*np.sin((2*mt.pi)*n*x/13)*np.exp(-x/10))
+    # want to make yn < 1 values = 0 but not removed so indexing still works nicely for integration
+    for i in range(0,len(yn)):
+        if yn[i] < 0:
+            yn[i] = 0
+    return yn
+dx = 0.01
+xn = np.arange(0,13+dx,dx)
+yn = sinf(xn,4) # can change n
+# just to check sin correct
+plt.scatter(xn,yn) # looks right
+
+def TrapInt(A,B,x_known,y_known):
+    I = 0 # init
+    h = x_known[1] - x_known[0]
+    for n in range(1,len(y_known)):
+        I += y_known[n] 
+    I = h*(I + y_known[0] + y_known[-1]/2)
+    return I
+
+
+# Finding just area under sin curve for n
+n = 2
+A_sin = TrapInt(0,13,xn,sinf(xn,n))
+Atot = A_circ-A_sin
+print("A tot",Atot)
+
+# now doing this for each n of the digits of my CID
+CID = [0,2,4,1,3,4,0,0]
+CID_a = np.array(CID)
+
+A_tots = np.array([0,0,0,0,0,0,0,0])
+for i in range(0,len(CID_a)):
+    A_sin_n = TrapInt(0,13,xn,sinf(xn,CID_a[i]))
+    A_tots[i] = A_circ - A_sin_n
+
+digits = np.arange(0,len(CID_a))
+
+# plot
+plt.figure(figsize=(10, 4))
+plt.plot(digits,A_tots, label='area')
+plt.xlabel('digits')
+plt.ylabel('area')
+plt.title('Areas')
+plt.grid()
+plt.legend()
+plt.tight_layout()
+plt.show()
