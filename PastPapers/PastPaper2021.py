@@ -75,3 +75,141 @@ def simpsons_over_triangle(dx, dy):
 I_result = simpsons_over_triangle(dx, dy)
 print("Integral of sin(xy)*cos(x+y) over triangular region A:", I_result)
 
+
+"""
+Task B: Lagrnagian interp of two functions
+"""
+# open set 1 values
+with open('/Users/hedgehog/Desktop/MechEng_Degree/ME2_All/Computing_ME2/Python_ME2/NumericalMethods/NumericalMethods/txt_Data/Sety1.txt', 'r') as d:
+    T1 = d.readlines()
+# set 2 values
+with open('/Users/hedgehog/Desktop/MechEng_Degree/ME2_All/Computing_ME2/Python_ME2/NumericalMethods/NumericalMethods/txt_Data/Sety2.txt', 'r') as d:
+    T2 = d.readlines()
+
+# Initialize lists to store cleaned float values
+T1_known = []
+for item in T1:
+    term = item.strip()
+    try:
+        clean_term = float(term)
+        T1_known.append(round(clean_term))
+    except ValueError:
+        continue
+
+T1n= np.array(T1_known)
+print("T1", T1n)
+
+# Initialize lists to store cleaned float values for set 2
+T2_known = []
+for item in T2:
+    term = item.strip()
+    try:
+        clean_term = float(term)
+        T2_known.append(round(clean_term))
+    except ValueError:
+        continue
+
+T2n= np.array(T2_known)
+print("T2", T2n)
+
+
+# Corresponding xn's
+xn1 = np.arange(0, 10+0.5, 0.5)
+xn2 = np.arange(0,10+0.6,0.6)
+print("xn1",xn1)
+print("xn2",xn2)
+# Interpolation using Lagrangian method
+def Langrangian(x_known, y_known, xp):
+    n = len(x_known)
+    P = 0
+    for i in range(n):
+        Li = 1
+        for j in range(n):
+            if i != j:
+                Li *= (xp - x_known[j]) / (x_known[i] - x_known[j])
+        P += y_known[i] * Li
+    return P
+
+def InterpPoints(x_known, y_known, InterpMethod, xp_points):
+    yp_points = xp_points.copy()
+    for i in range(len(xp_points)):
+        yp_points[i] = InterpMethod(x_known, y_known, xp_points[i])
+    return yp_points
+
+# Bracketing interval between t = 3 and t = 3.5
+x_interp = np.arange(2, 8, 0.05)
+
+T1_interp = InterpPoints(xn1,T1n, Langrangian, x_interp)
+T2_interp = InterpPoints(xn2,T2n, Langrangian, x_interp)
+
+Z = T1_interp+ T2_interp # interp first then adding so x's align
+
+# Plotting interpolated section
+plt.figure(figsize=(8, 4))
+plt.plot(x_interp, Z, color='black')
+plt.scatter(xn1,T1n)
+plt.scatter(xn2,T2n)
+plt.title("Interpolated points Z")
+plt.xlabel("t")
+plt.ylabel("T(t)")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+"""
+Task C: solve forward Euler first order ODE in dy/dx
+"""
+
+def func(x, Y):
+    y0, y1 = Y
+    dy0 = y1
+    dy1 = (2/x)*y1 - 2*y0/(x**2)
+    return np.array([dy0, dy1])
+
+# Forward Euler Method for systems
+def FwEuler(x0, h, x_final,a):
+    # Initial conditions
+    y0_init = 10
+    y1_init = a
+
+    Y0 = np.array([y0_init, y1_init])
+    x_values = [x0]
+    y_values = [Y0]
+    x = x0
+    Y = Y0.copy()
+
+    while x < x_final:
+        Y = Y + h * func(x, Y)
+        x = x + h
+
+        x_values.append(x)
+        y_values.append(Y.copy())
+
+    return np.array(x_values), np.array(y_values)
+
+
+# x domain
+x0 = 4
+x_final = 20
+h = 0.1 # dx
+
+# Solve using FWD Euler method
+a = [0,1,2,4,8]
+plt.figure(figsize=(10, 4))
+for i in range(0,len(a)):
+    x_vals, y_vals = FwEuler(x0, h, x_final,a[i])
+    # Plot y(x) for each a 
+    plt.plot(x_vals, y_vals[:, 0], label=f'a = {a[i]}')  # plot y0
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('Numerical Solution y(x) using Forward Euler')
+    plt.grid()
+    plt.legend()
+    plt.tight_layout()
+plt.show()
+
+
+"""
+Task D
+"""
+
