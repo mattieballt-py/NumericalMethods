@@ -188,12 +188,12 @@ inside = ((R - np.sqrt(X**2 + Y**2))**2) < r**2
 
 # solve for z using: z² = r² - (R - sqrt(x² + y²))²
 Z = np.zeros_like(X)
-Z[inside] = np.sqrt(r**2 - (R - np.sqrt(X[inside]**2 + Y[inside]**2))**2)
+Z[inside] = np.sqrt(r**2 - (R - np.sqrt(X[inside]**2 + Y[inside]**2))**2) 
 
 # V = ∭ dV over enclosed volume
 # integrate z twice (positive and negative halves)
 def VolumeTorusMasked(Z, dx, dy):
-    return 2 * np.sum(Z) * dx * dy  # *2 for full height (±z)
+    return 2* np.sum(Z) * dx * dy  # *2 for full height (±z)
 
 dx = x[1] - x[0]
 dy = y[1] - y[0]
@@ -202,22 +202,45 @@ print("Volume of torus (numerical double integration):", V_torus)
 
 #3. 3D Plot of Torus Surface of Revolution
 
+# Define torus parameters
+R = 10  # distance from center of hole to tube center
+r = 4   # radius of the tube
 
-# define upper semi-circle of torus profile
-x_profile = np.linspace(R - r, R + r, 200)
-y_profile = np.sqrt(r**2 - (x_profile - R)**2)
+# Create parameter grid
+theta = np.linspace(0, 2 * np.pi, 100)  # around tube
+phi = np.linspace(0, 2 * np.pi, 100)    # around center
+theta, phi = np.meshgrid(theta, phi)
 
-# define rotation mesh
-theta = np.linspace(0, 2 * np.pi, 200)
-X, T = np.meshgrid(x_profile, theta)
-Y = np.tile(y_profile, (len(theta), 1))
-Z = Y * np.sin(T)
-Y = Y * np.cos(T)
+# Parametric equations for torus
+X = (R + r * np.cos(theta)) * np.cos(phi)
+Y = (R + r * np.cos(theta)) * np.sin(phi)
+Z = r * np.sin(theta)
 
+
+# Plot torus with same scale axis
 fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(X, Y, Z, cmap='plasma', edgecolor='none', alpha=0.9)
-ax.set_title('3D Surface of a Torus')
+
+# Compute axis limits for equal aspect
+x_limits = [X.min(), X.max()]
+y_limits = [Y.min(), Y.max()]
+z_limits = [Z.min(), Z.max()]
+
+x_range = x_limits[1] - x_limits[0]
+y_range = y_limits[1] - y_limits[0]
+z_range = z_limits[1] - z_limits[0]
+max_range = max(x_range, y_range, z_range)
+
+x_middle = np.mean(x_limits)
+y_middle = np.mean(y_limits)
+z_middle = np.mean(z_limits)
+
+ax.set_xlim(x_middle - max_range/2, x_middle + max_range/2)
+ax.set_ylim(y_middle - max_range/2, y_middle + max_range/2)
+ax.set_zlim(z_middle - max_range/2, z_middle + max_range/2)
+
+ax.set_title('3D Parametric Torus')
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
