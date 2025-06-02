@@ -238,3 +238,59 @@ def inverse_dist_triangle(r,func,p): # uses 1/distance between point and triangl
 
 #print(inverse_dist_triangle(r,func,p))
 
+
+"""
+Langangian interpolation with discrete points and not f(x)
+"""
+
+with open('/Users/hedgehog/Desktop/MechEng_Degree/ME2_All/Computing_ME2/Python_ME2/NumericalMethods/NumericalMethods/txt_Data/Temperatures.txt', 'r') as d:
+    T = d.readlines()
+
+# Initialize lists to store cleaned float values
+Temps_known = []
+for item in T:
+    term = item.strip()
+    try:
+        clean_term = float(term)
+        Temps_known.append(round(clean_term))
+    except ValueError:
+        continue
+
+Temp_known = np.array(Temps_known)
+print("Temps", Temp_known)
+
+# Corresponding time array
+t_known = np.arange(0, 6, 0.5)
+print("time", t_known)
+
+# Interpolation using Lagrangian method
+def Langrangian(x_known, y_known, xp):
+    n = len(x_known)
+    P = 0
+    for i in range(n):
+        Li = 1
+        for j in range(n):
+            if i != j:
+                Li *= (xp - x_known[j]) / (x_known[i] - x_known[j])
+        P += y_known[i] * Li
+    return P
+
+def InterpPoints(x_known, y_known, InterpMethod, xp_points):
+    yp_points = xp_points.copy()
+    for i in range(len(xp_points)):
+        yp_points[i] = InterpMethod(x_known, y_known, xp_points[i])
+    return yp_points
+
+# Bracketing interval between t = 3 and t = 3.5
+t_interp = np.arange(3, 3.5, 0.005)
+Temp_interp = InterpPoints(t_known, Temp_known, Langrangian, t_interp)
+
+# Plotting interpolated section
+plt.figure(figsize=(8, 4))
+plt.scatter(t_interp, Temp_interp, color='black')
+plt.title("Interpolated points for root finding")
+plt.xlabel("t")
+plt.ylabel("T(t)")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
