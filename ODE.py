@@ -265,3 +265,75 @@ plt.grid()
 plt.legend()
 plt.tight_layout()
 plt.show()
+
+# in dy/dx
+"""
+FWD Euler Explicit System ODE in dy/dx form
+"""
+
+# Define system of ODEs: dy/dx = f(x, y)
+def func(x, Y):
+    y0, y1  = Y  # unpack vector
+
+    # dy0/dx = y1, dy1/dx = y2, dy2/dx = y3
+    dy0 = y1
+    dy1 = -(x + 7) *np.sin(x) - 5*x*y1
+
+    return np.array([dy0, dy1])
+
+# Forward Euler Method for systems
+def FwEuler(Y0, x0, h, x_final):
+    x_values = [x0]
+    y_values = [Y0]
+
+    x = x0
+    Y = Y0.copy()
+
+    while x < x_final:
+        Y = Y + h * func(x, Y)
+        x = x + h
+
+        x_values.append(x)
+        y_values.append(Y.copy())
+
+    return np.array(x_values), np.array(y_values)
+
+# Initial conditions
+y0_init = 4
+y1_init = 3
+
+Y0 = np.array([y0_init, y1_init])
+
+# x domain
+x0 = 0
+x_final = 15
+h = 0.02 # dx
+
+# Solve using FWD Euler method
+x_vals, y_vals = FwEuler(Y0, x0, h, x_final)
+
+# Extract relevant components
+y_x = y_vals[:, 0]         # y(t)
+y2_x = y_vals[:, 1]        # d²y/dt²
+
+# Plot y(x) 
+plt.figure(figsize=(10, 4))
+plt.plot(x_vals, y_x, label='y(x)')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Numerical Solution y(x) using Forward Euler')
+plt.grid()
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# Plot d²y/dx²
+plt.figure(figsize=(10, 4))
+plt.plot(x_vals, y2_x, label='d²y/dx²', color='orange')
+plt.xlabel('x')
+plt.ylabel('d²y/dx²')
+plt.title('Second Derivative of y(x)')
+plt.grid()
+plt.legend()
+plt.tight_layout()
+plt.show()
