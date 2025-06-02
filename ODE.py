@@ -188,3 +188,80 @@ plt.grid(True)
 plt.title("Backward Euler with Newton-Raphson")
 plt.show()
 
+"""
+FWD Euler for system of equations
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define system of ODEs: dy/dt = f(t, y)
+def func(t, Y):
+    y0, y1, y2, y3 = Y  # unpack vector
+
+    # dy0/dt = y1, dy1/dt = y2, dy2/dt = y3
+    dy0 = y1
+    dy1 = y2
+    dy2 = y3
+    dy3 = -2*y2 - y0 + 3*np.sin(t) - 5*np.cos(t)
+
+    return np.array([dy0, dy1, dy2, dy3])
+
+# Forward Euler Method for systems
+def FwEuler(Y0, t0, h, t_final):
+    t_values = [t0]
+    y_values = [Y0]
+
+    t = t0
+    Y = Y0.copy()
+
+    while t < t_final:
+        Y = Y + h * func(t, Y)
+        t = t + h
+
+        t_values.append(t)
+        y_values.append(Y.copy())
+
+    return np.array(t_values), np.array(y_values)
+
+# --- Initial conditions ---
+y0_init = 5
+y1_init = 8
+y2_init = 3
+y3_init = 10
+
+Y0 = np.array([y0_init, y1_init, y2_init, y3_init])
+
+# --- Time domain ---
+t0 = 0
+t_final = 15
+h = 0.001
+
+# --- Solve using Euler method ---
+t_vals, y_vals = FwEuler(Y0, t0, h, t_final)
+
+# --- Extract relevant components ---
+y_t = y_vals[:, 0]         # y(t)
+y2_t = y_vals[:, 2]        # d²y/dt²
+
+# --- Plot y(t) ---
+plt.figure(figsize=(10, 4))
+plt.plot(t_vals, y_t, label='y(t)')
+plt.xlabel('t')
+plt.ylabel('y')
+plt.title('Numerical Solution y(t) using Forward Euler')
+plt.grid()
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# --- Plot d²y/dt² ---
+plt.figure(figsize=(10, 4))
+plt.plot(t_vals, y2_t, label='d²y/dt²', color='orange')
+plt.xlabel('t')
+plt.ylabel('d²y/dt²')
+plt.title('Second Derivative of y(t)')
+plt.grid()
+plt.legend()
+plt.tight_layout()
+plt.show()
