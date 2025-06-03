@@ -337,3 +337,50 @@ plt.grid()
 plt.legend()
 plt.tight_layout()
 plt.show()
+
+
+"""
+First order diffusion simple
+"""
+
+# Newton's Law of Cooling: dT/dt = -k(T - T_env)
+def func(t, T):
+    k = 0.03  # per minute
+    Tenv = 22  # ambient temp
+    return -k * (T - Tenv)
+
+# Forward Euler method
+def FwEuler(T0, t0, dt, t_final):
+    t_values = [t0]
+    T_values = [T0]
+
+    T = T0
+    t = t0
+
+    while t < t_final:
+        T += dt * func(t, T)
+        t += dt
+        t_values.append(t)
+        T_values.append(T)
+
+    return np.array(t_values), np.array(T_values)
+
+# Initial condition
+T0 = 90
+t0 = 0
+t_final = 60  # 60 minutes
+dt = 1        # step size in minutes
+
+# Solve ODE
+t_vals, T_vals = FwEuler(T0, t0, dt, t_final)
+
+# Plot
+plt.figure(figsize=(10, 4))
+plt.plot(t_vals, T_vals, label='Temperature (Euler Method)', color='brown')
+plt.xlabel('Time (minutes)')
+plt.ylabel('Temperature (°C)')
+plt.title("Cooling of Coffee Over Time")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()

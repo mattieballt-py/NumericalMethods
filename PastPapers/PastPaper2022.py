@@ -96,7 +96,6 @@ alpha = np.ndarray(len(x))
 alpha[:int(Nx/2)] = 4.5e-2
 # set the diffusivity for pistachio
 alpha[int(Nx/2):] = 8.6e-2
-# ================================================
 
 averagep = np.average(T[0,int(Nx/2):])
 averagew = np.average(T[0,:int(Nx/2)])
@@ -212,5 +211,117 @@ plt.tight_layout()
 plt.show()
 
 """
-
+3D Cone Integration with trapezium rule
 """
+
+#1. Volume of a cone using Trapezium Rule in mm
+
+
+# define parameters for the cone
+A = 0      # lower limit (base)
+B = 150    # upper limit (height)
+h = 5 # dz
+N = int((B-A)/h)  # number of intervals
+
+
+# profile function for cone (linear slope)
+def f_cone(x):
+    return 0.2*x  # straight line from base to tip
+
+# known x values
+x_known = np.linspace(A, B, N+1)
+y_known = f_cone(x_known)
+
+# V = π ∫[a to b] (f(x))² dx – volume around x-axis
+def VolumeTrapX(A, B, h, N, y_known):
+    integrand = np.pi * y_known**2
+    I = 0
+    for n in range(1, N):
+        I += integrand[n]
+    I = h * (I + integrand[0]/2 + integrand[-1]/2)
+    return I
+
+print("Volume of cone (around x-axis):", VolumeTrapX(A, B, h, N, y_known))
+
+# 3D surface of revolution plot (cone)
+theta = np.linspace(0, 2 * np.pi, 100)
+X, T = np.meshgrid(x_known, theta)
+R = f_cone(X)
+Y = R * np.cos(T)
+Z = R * np.sin(T)
+
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(X, Y, Z, cmap='plasma', edgecolor='none', alpha=0.9)
+ax.set_title('3D Surface of Cone (Revolved around x-axis)')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
+plt.tight_layout()
+plt.show()
+
+
+# or
+
+# in cartesian: (discretization in z too, much more accurate. for when dx,dy and dz given)
+# function trapzeqd: compute numerical integration with trapezium rule with equidistant nodes
+def trapzeqd(x,y):
+    # get the interval h: distance between any two consecutives nodes
+    h = x[1] - x[0]
+    # get the number of intervals
+    N = len(x) - 1  # obviously x and y must have same length
+    
+    # compute the integral
+    
+    # compute the sum for the intermediate points
+    S = 0.0
+    for n in range(1,N):
+        S += y[n]  # add the current calue of y
+    # add first and last points: see the formula for trapezoidal method
+    I = h * (y[0]/2 + S + y[-1]/2 )
+    
+    # an alternative approach, with slicing and the function np.sum(), the integral can be computed within one line
+    I = h * (y[0]/2 + np.sum(y[1:-1]) + y[-1]/2 )
+    
+    return I
+# set dimensions (in mm)
+H = 150
+R = 30
+
+# set discretising steps
+dx = 0.05
+dy = 0.05
+dz = 5
+
+# integrate for every z
+# create the z range
+zr = np.arange(dz,H+dz,dz)
+# determine all the circular sections surfaces
+Iz = []
+for z in zr:
+    # integrate along x
+    Rz = 0.2*z
+    # define the x range
+    xr = np.arange(-Rz+dx,Rz,dx)
+    Ix = []
+    for x in xr:
+        # integrate along y
+        # define the y range
+        m = np.sqrt(Rz**2-x**2)
+        yr = np.arange(-m+dy,m,dy)
+        # define the function to be integrated (all ones)
+        F = np.ones(len(yr))
+        # integrate with trapezium rule along y
+        Ix += [trapzeqd(yr,F)]
+    Ix = np.array(Ix)
+    # integrate with trapezium rule along x
+    Iz += [trapzeqd(xr,Ix)]        
+# integrate with trapezium rule along x
+Iz = np.array(Iz)
+I = trapzeqd(zr,Iz)      
+
+print(I)
+
+# double check with analytical formula
+I = np.pi*R**2*H/3
+print(I)

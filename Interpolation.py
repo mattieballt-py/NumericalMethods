@@ -294,3 +294,74 @@ plt.ylabel("T(t)")
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+
+"""
+Cubic Spline Interpolation
+"""
+
+
+# Step 1: Compute second derivatives (M values) for natural cubic spline
+def compute_spline_coefficients(x, y):
+    n = len(x)
+    h = np.diff(x)
+
+    # Set up matrix A and RHS vector b
+    A = np.zeros((n, n))
+    b = np.zeros(n)
+
+    # Natural boundary conditions
+    A[0, 0] = 1
+    A[-1, -1] = 1
+
+    for i in range(1, n-1):
+        A[i, i-1] = h[i-1]
+        A[i, i]   = 2 * (h[i-1] + h[i])
+        A[i, i+1] = h[i]
+        b[i] = 6 * ((y[i+1] - y[i]) / h[i] - (y[i] - y[i-1]) / h[i-1])
+
+    # Solve the linear system A * M = b
+    M = np.linalg.solve(A, b)
+    return M
+
+# Step 2: Evaluate spline at a single point xp
+def CubicSplineInterp(x, y, M, xp):
+    n = len(x)
+    for i in range(n - 1):
+        if x[i] <= xp <= x[i+1]:
+            h = x[i+1] - x[i]
+            A = (x[i+1] - xp) / h
+            B = (xp - x[i]) / h
+            S = (A * y[i] + B * y[i+1] +
+                 ((A**3 - A) * M[i] + (B**3 - B) * M[i+1]) * h**2 / 6)
+            return S
+    return None  # if xp is out of bounds
+
+# Step 3: Interpolation driver
+def InterpPoints(x_known, y_known, InterpMethod, xp_points, M=None):
+    yp_points = np.zeros_like(xp_points)
+    for i in range(len(xp_points)):
+        yp_points[i] = InterpMethod(x_known, y_known, M, xp_points[i])
+    return yp_points
+
+# Example known data
+x_known = np.array([0, 5, 10, 15, 20])
+y_known = np.array([22, 24, 31, 45, 60])
+
+# Compute spline coefficients
+M_coeffs = compute_spline_coefficients(x_known, y_known)
+
+# Interpolate
+x_interp = np.arange(3, 17, 0.1)
+y_interp = InterpPoints(x_known, y_known, CubicSplineInterp, x_interp, M_coeffs)
+
+# Plotting
+plt.figure(figsize=(8, 4))
+plt.plot(x_interp, y_interp, label='Cubic Spline', color='black')
+plt.scatter(x_known, y_known, color='red', label='Known Points')
+plt.title("Cubic Spline Interpolation (Numerical)")
+plt.xlabel("x")
+plt.ylabel("y(x)")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
