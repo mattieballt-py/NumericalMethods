@@ -71,3 +71,78 @@ plt.title('Crank-Nicolson Solution for Heat Equation')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+
+
+"""
+BWD Euler Implicit
+"""
+#Example question: 
+    # d^2y/dt^2 + c/m (dy/dt) + (g/L) sin(y) = 0
+
+"""To alter: the equation solve for yn"""
+def func(yn,ynp,ynp2,tn,h):
+    """Put all terms on one side = f"""
+    f = (yn-2*ynp+ynp2)/h**2+c/m*(yn-ynp)/h+g/L*np.sin(yn)
+    #f = yn*(1+h**2*c/m) + h**2*g/L*np.sin(yn) - 2*ynp + ynp2 
+    return f
+
+def mybisection(a,b,ynp,ynp2,tn,h,eps):
+    """To change: any input parameters to mybisection"""
+    # repeat the split of teh interval until the bracketing intervla becomes smaller than the accuracy
+    while abs(a-b)>eps:
+        # calculate the mid point
+        xm = (a + b) / 2
+        # establish in which subinterval the solution lies
+        # compute f(a) * f(xm)
+        ff = func(a,ynp,ynp2,tn,h) * func(xm,ynp,ynp2,tn,h)
+        if ff < 0: 
+            # the solution lies in the left interval
+            # set the upper bracket as xm
+            b = xm
+        else:
+            # the solution lies in the right interval
+            # set the lower bracket as xm
+            a = xm
+            
+    # the true solution is bracketed within the latest interval [a,b]
+    # we can approximate it with the midpoint
+    sol = (a + b) / 2
+    
+    return sol
+
+"""Define constants and domain"""
+g = 9.8 #Gravity ms-2
+L = 2 #Length m
+m = 10 #Mass kg
+c = 0.001 #damping Ns/m
+
+dt = 0.1 #time step
+tend = 20 #end time
+y0 = 45.0 #initial angle in degrees
+vinit = 0 # initial velocity
+t = np.arange(0,tend,dt)
+y = np.ndarray(len(t))
+y[0] = y0*np.pi/180 # initial condition on position
+y[1] = vinit*dt+y[0] # intial condition on velocity
+ynp = y[1] #y_n-1
+ynp2 = y[0] #y_n-2
+
+# iterate from the third time step
+for i in range(2,len(t)):
+    # determine the solution at this time step
+    """To change, input parameters to "mybisection"""
+    y[i] = mybisection(-np.pi/2,np.pi/2,ynp,ynp2,t[i],dt,0.001) # the angle of solution will not exceed -pi/2 +pi/2
+    ynp = y[i] # make the current solution as the solution at previous time step
+    ynp2 = y[i-1] # update the solution at two timesteps ago
+    
+plt.plot(t,y*180/np.pi,'b')
+plt.grid()
+plt.show()
+
+# determine the velocity
+v = np.ndarray(len(t)-1)
+v = (y[1:] - y[:-1])/dt
+plt.plot(t[:-1],v,'b')
+plt.grid()
+plt.show()

@@ -301,25 +301,35 @@ Cubic Spline Interpolation
 
 
 # Step 1: Compute second derivatives (M values) for natural cubic spline
-def compute_spline_coefficients(x, y):
+def compute_spline_coefficients(x, y, clamped=False, fp_start=None, fp_end=None):
     n = len(x)
     h = np.diff(x)
 
-    # Set up matrix A and RHS vector b
     A = np.zeros((n, n))
     b = np.zeros(n)
 
-    # Natural boundary conditions
-    A[0, 0] = 1
-    A[-1, -1] = 1
+    if not clamped:
+        # Natural spline
+        A[0, 0] = 1
+        A[-1, -1] = 1
+    else:
+        # Clamped spline
+        A[0, 0] = 2 * h[0]
+        A[0, 1] = h[0]
+        b[0] = 6 * ((y[1] - y[0]) / h[0] - fp_start)
 
-    for i in range(1, n-1):
-        A[i, i-1] = h[i-1]
-        A[i, i]   = 2 * (h[i-1] + h[i])
-        A[i, i+1] = h[i]
-        b[i] = 6 * ((y[i+1] - y[i]) / h[i] - (y[i] - y[i-1]) / h[i-1])
+        A[-1, -2] = h[-1]
+        A[-1, -1] = 2 * h[-1]
+        b[-1] = 6 * (fp_end - (y[-1] - y[-2]) / h[-1])
 
-    # Solve the linear system A * M = b
+    # Middle rows (same for both)
+    for i in range(1, n - 1):
+        A[i, i - 1] = h[i - 1]
+        A[i, i]     = 2 * (h[i - 1] + h[i])
+        A[i, i + 1] = h[i]
+        b[i] = 6 * ((y[i + 1] - y[i]) / h[i] - (y[i] - y[i - 1]) / h[i - 1])
+
+    # Solve the system
     M = np.linalg.solve(A, b)
     return M
 
@@ -353,6 +363,12 @@ M_coeffs = compute_spline_coefficients(x_known, y_known)
 # Interpolate
 x_interp = np.arange(3, 17, 0.1)
 y_interp = InterpPoints(x_known, y_known, CubicSplineInterp, x_interp, M_coeffs)
+
+fp_start = 1.0  # First derivative at x[0]
+fp_end = -0.5   # First derivative at x[-1]
+
+M_clamped = compute_spline_coefficients(x_known, y_known, clamped=True, fp_start=fp_start, fp_end=fp_end)
+M_natural = compute_spline_coefficients(x_known, y_known)  # default: clamped=False
 
 # Plotting
 plt.figure(figsize=(8, 4))
