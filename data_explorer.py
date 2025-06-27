@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 st.set_page_config(page_title="Data Explorer", layout="centered")
-st.title("Data Explorer")
+st.title("Data Explorer (base set up, sin wave with noise)")
 
 # Sidebar controls
 st.sidebar.header("Settings")
