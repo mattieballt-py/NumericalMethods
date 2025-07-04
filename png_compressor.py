@@ -15,6 +15,6 @@ def compress_png(input_path, output_path, optimize=True, reduce_colors=False):
 # Example usage
 import os
 
-input_file = "/Users/hedgehog/Desktop/MechEng_Degree/ME2_All/Computing_ME2/Python_ME2/NumericalMethods/NumericalMethods/img_Data/Screenshot 2025-07-04 at 18.28.00 1.png"
+input_file = "img_Data/Screenshot 2025-07-04 at 18.48.55.png"
 output_file = "your_image_compressed.png"
 compress_png(input_file, output_file, optimize=True, reduce_colors=True)
