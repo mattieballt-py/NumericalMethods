@@ -8,6 +8,37 @@ def invert_matrix(matrix):
     except np.linalg.LinAlgError:
         return None
 
+def multiply_by_vector(inverse):
+    """Multiply the inverse matrix by a 6x1 vector"""
+    print("\n" + "="*50)
+    print("=== Matrix-Vector Multiplication ===\n")
+    
+    # Your 6x1 vector - replace these values
+    vector = np.array([
+        [0],  # Element 1
+        [0],  # Element 2
+        [0],  # Element 3
+        [-5000],  # Element 4
+        [0],  # Element 5
+        [0]   # Element 6
+    ])
+    
+    print("Vector:")
+    print(vector.flatten())
+    print()
+    
+    # Multiply
+    result = np.matmul(inverse, vector)
+    
+    print("Result (Inverse Matrix × Vector):")
+    print(result.flatten())
+    print()
+    
+    # Print in format for Excel
+    print("Result (formatted for Excel):")
+    for val in result.flatten():
+        print(f'{val:.6e}')
+
 def main():
     print("=== 6x6 Matrix Inverter ===\n")
     
@@ -43,6 +74,9 @@ def main():
         print("Inverse Matrix (formatted for Excel copy-paste):")
         for row in inverse:
             print('\t'.join([f'{val:.6e}' for val in row]))
+        
+        # Now multiply by vector
+        multiply_by_vector(inverse)
     else:
         print("Error: Matrix is singular and cannot be inverted.")
         print("(The determinant is zero or very close to zero)")
